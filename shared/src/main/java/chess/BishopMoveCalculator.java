@@ -21,11 +21,14 @@ public class BishopMoveCalculator implements ChessPieceMoveCalculator {
     private void addDiagonalMoves (Collection<ChessMove> moves, ChessBoard board, ChessPosition position, ChessGame.TeamColor color, int rowDirection, int colDirection) {
         int startRow = position.getRow();
         int startCol = position.getColumn();
+        System.out.println(board.toString());
         while (true)  {
             startRow += rowDirection;
             startCol += colDirection;
             ChessPosition target = new ChessPosition(startRow, startCol);
+            System.out.println("Exploring target: " + target.getRow() + ", " + target.getColumn()); // Debug logging
             if (!isInBounds(target)) {
+                System.out.println("first break reached");
                 break;
             }
             if (isSquareEmpty(board, target)) {
@@ -35,6 +38,7 @@ public class BishopMoveCalculator implements ChessPieceMoveCalculator {
                 if (color != targetColor) {
                     moves.add(new ChessMove(position, target, null));
                 }
+                System.out.println("second break reached");
                 break;
             }
         }
@@ -42,12 +46,14 @@ public class BishopMoveCalculator implements ChessPieceMoveCalculator {
     }
 
     private boolean isSquareEmpty(ChessBoard board, ChessPosition square) {
+        if (board.getPiece(square) != null) System.out.println("this square contains: " + board.getPiece(square).getPieceType());
         return board.getPiece(square) == null;
     }
 
     private boolean isInBounds(ChessPosition target) {
         int row = target.getRow();
         int col = target.getColumn();
+
 
         return row <= 8 && col <= 8 && row >= 1 && col >= 1;
     }

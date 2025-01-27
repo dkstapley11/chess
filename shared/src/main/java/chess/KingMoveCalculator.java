@@ -26,7 +26,7 @@ public class KingMoveCalculator implements ChessPieceMoveCalculator {
         int row = target.getRow();
         int col = target.getColumn();
         // didn't move
-        if (target == kingPosition) {
+        if (target.equals(kingPosition)) {
             return false;
         }
         // check if out of bounds
