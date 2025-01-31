@@ -2,39 +2,55 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class KingMoveCalculator implements ChessPieceMoveCalculator {
+    @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         Collection<ChessMove> moves = new ArrayList<>();
+        ChessGame.TeamColor color = board.getPiece(position).getTeamColor();
 
-        int[] validOffsets = {-1, 0, 1};
-        int currentRow = position.getRow();
-        int currentCol = position.getColumn();
+        int row = position.getRow();
+        int col = position.getColumn();
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                int newRow = currentRow + validOffsets[i];
-                int newCol = currentCol + validOffsets[j];
-                if (isLegalMove(board, new ChessPosition(newRow, newCol), position)) {
-                    moves.add(new ChessMove(position, new ChessPosition(newRow, newCol), null));
-                }
+        int [][] potentialMoves = {{1,1}, {1,0}, {1,-1}, {0,1}, {0,-1}, {-1,1}, {-1,0}, {-1,-1}};
+
+        for (int[] move : potentialMoves) {
+            if (validateMove(board, position, move, color)) {
+                moves.add(new ChessMove(position, new ChessPosition(row + move[0], col + move[1]), null));
             }
         }
+
         return moves;
     }
-    private boolean isLegalMove(ChessBoard board, ChessPosition target, ChessPosition kingPosition) {
-        int row = target.getRow();
-        int col = target.getColumn();
-        // didn't move
-        if (target.equals(kingPosition)) {
+
+    public boolean validateMove(ChessBoard board, ChessPosition position, int[] move, ChessGame.TeamColor color) {
+        int targetRow = position.getRow() + move[0];
+        int targetCol = position.getColumn() + move[1];
+        if (outOfBounds(targetRow, targetCol)) {
             return false;
         }
-        // check if out of bounds
-        if (row > 8 || col > 8 || row < 1 || col < 1) {
-            return false;
+        ChessPosition target = new ChessPosition(targetRow, targetCol);
+        if (squareEmpty(board, target)) {
+            return true;
         }
-        // make sure other piece is not the same team
-        ChessPiece targetPiece = board.getPiece(target);
-        return targetPiece == null || targetPiece.getTeamColor() != board.getPiece(kingPosition).getTeamColor();
+        // if enemy
+        if (!squareEmpty(board, target) && board.getPiece(target).getTeamColor() != color) {
+            return true;
+        }
+        // can only mean friendly piece
+        return false;
+    }
+
+    public boolean outOfBounds(int row, int col) {
+        if (row > 8) return true;
+        if (col > 8) return true;
+        if (row < 1) return true;
+        if (col < 1) return true;
+        return false;
+    }
+
+    public boolean squareEmpty(ChessBoard board, ChessPosition position) {
+        return board.getPiece(position) == null;
     }
 }
