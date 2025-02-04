@@ -13,11 +13,15 @@ public class ChessGame {
     private TeamColor color;
     private TeamColor turn;
     private ChessBoard board;
+    private ChessPosition WKingPosition;
+    private ChessPosition BKingPosition;
 
 
     public ChessGame() {
         this.turn = TeamColor.WHITE;
         this.board = new ChessBoard();
+        this.WKingPosition = new ChessPosition(1, 5);
+        this.BKingPosition = new ChessPosition(8, 5);
         board.resetBoard();
     }
 
@@ -95,6 +99,92 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         board.
     }
+
+    private boolean isSquareEmpty(ChessBoard board, ChessPosition square) {
+        return board.getPiece(square) == null;
+    }
+
+    private boolean isInBounds(ChessPosition target) {
+        int row = target.getRow();
+        int col = target.getColumn();
+
+        return row <= 8 && col <= 8 && row >= 1 && col >= 1;
+    }
+
+    public boolean checkDiagonalDanger(ChessPosition kingPosition, TeamColor kingColor, int rowDirection, int colDirection) {
+        int startRow = kingPosition.getRow();
+        int startCol = kingPosition.getColumn();
+        while (true) {
+            startRow += rowDirection;
+            startCol += colDirection;
+            ChessPosition target = new ChessPosition(startRow, startCol);
+            if (!isInBounds(target)) {
+                break;
+            }
+            if (!isSquareEmpty(board, target)) {
+                ChessPiece piece = board.getPiece(target);
+                TeamColor color = piece.getTeamColor();
+                ChessPiece.PieceType type = piece.getPieceType();
+                if (color == kingColor) {
+                    break;
+                }
+                if (type == ChessPiece.PieceType.QUEEN || type == ChessPiece.PieceType.BISHOP) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean checkStraightDanger(ChessPosition kingPosition, TeamColor kingColor, int rowDirection, int colDirection) {
+        int startRow = kingPosition.getRow();
+        int startCol = kingPosition.getColumn();
+        while (true) {
+            startRow += rowDirection;
+            startCol += colDirection;
+            ChessPosition target = new ChessPosition(startRow, startCol);
+            if (!isInBounds(target)) {
+                break;
+            }
+            if (!isSquareEmpty(board, target)) {
+                ChessPiece piece = board.getPiece(target);
+                TeamColor color = piece.getTeamColor();
+                ChessPiece.PieceType type = piece.getPieceType();
+                if (color == kingColor) {
+                    break;
+                }
+                if (type == ChessPiece.PieceType.QUEEN || type == ChessPiece.PieceType.ROOK) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean checkKnightDanger(ChessPosition kingPosition, TeamColor kingColor) {
+        int[][] possibleMoves = {
+                {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+        };
+        for (int[] move : possibleMoves) {
+            ChessPosition check = new ChessPosition(move[0], move[1]);
+            if (!isInBounds(check)) {
+                break;
+            }
+            if (!isSquareEmpty(board, check)) {
+                ChessPiece target = board.getPiece(check);
+                if (target.getPieceType() == ChessPiece.PieceType.KNIGHT && target.getTeamColor() != kingColor) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean checkPawnDanger(ChessPosition kingPosition, TeamColor color) {
+        return false;
+    }
+
 
     /**
      * Determines if the given team is in checkmate
