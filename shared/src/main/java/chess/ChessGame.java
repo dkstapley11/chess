@@ -16,7 +16,9 @@ public class ChessGame {
 
 
     public ChessGame() {
-
+        this.turn = TeamColor.WHITE;
+        this.board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -70,6 +72,20 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+    public ChessPosition findKing(ChessBoard board, TeamColor color) {
+        for (int i = 0; i < 8; i++) {
+            for (int k = 0; k < 8; k++) {
+                ChessPosition currentPos = new ChessPosition(i, k);
+                // if statement here to make sure it's not empty??
+                ChessPiece currentPiece = board.getPiece(currentPos);
+                if (currentPiece.getPieceType() == ChessPiece.PieceType.KING && currentPiece.getTeamColor() == color) {
+                    return currentPos;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -77,7 +93,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        board.
     }
 
     /**
