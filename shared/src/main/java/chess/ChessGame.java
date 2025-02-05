@@ -97,7 +97,41 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        board.
+        ChessPosition kingPosition;
+        if (teamColor == TeamColor.WHITE) {
+            kingPosition = WKingPosition;
+        } else {
+            kingPosition = BKingPosition;
+        }
+
+        // Check diagonal danger
+        if (checkDiagonalDanger(kingPosition, teamColor, 1, 1) ||
+                checkDiagonalDanger(kingPosition, teamColor, 1, -1) ||
+                checkDiagonalDanger(kingPosition, teamColor, -1, 1) ||
+                checkDiagonalDanger(kingPosition, teamColor, -1, -1)) {
+            return true;
+        }
+
+        // Check knight danger
+        if (checkKnightDanger(kingPosition, teamColor)) {
+            return true;
+        }
+
+        // Check straight danger
+        if (checkStraightDanger(kingPosition, teamColor, 1, 0) ||
+                checkStraightDanger(kingPosition, teamColor, -1, 0) ||
+                checkStraightDanger(kingPosition, teamColor, 0, -1) ||
+                checkStraightDanger(kingPosition, teamColor, 0, 1)) {
+            return true;
+        }
+
+        // Check pawn danger
+        if (checkPawnDanger(kingPosition, teamColor)) {
+            return true;
+        }
+
+        // If none of the checks found danger, return false
+        return false;
     }
 
     private boolean isSquareEmpty(ChessBoard board, ChessPosition square) {
@@ -168,10 +202,7 @@ public class ChessGame {
         };
         for (int[] move : possibleMoves) {
             ChessPosition check = new ChessPosition(move[0], move[1]);
-            if (!isInBounds(check)) {
-                break;
-            }
-            if (!isSquareEmpty(board, check)) {
+            if (isInBounds(check) && !isSquareEmpty(board, check)) {
                 ChessPiece target = board.getPiece(check);
                 if (target.getPieceType() == ChessPiece.PieceType.KNIGHT && target.getTeamColor() != kingColor) {
                     return true;
@@ -182,6 +213,35 @@ public class ChessGame {
     }
 
     public boolean checkPawnDanger(ChessPosition kingPosition, TeamColor color) {
+        int kingRow = kingPosition.getRow();
+        int kingCol = kingPosition.getColumn();
+        if (color == TeamColor.WHITE) {
+            ChessPosition diagRight = new ChessPosition(kingRow + 1, kingCol + 1);
+            ChessPosition diagLeft = new ChessPosition(kingRow + 1, kingCol - 1);
+            if (isInBounds(diagLeft)) {
+                if (!isSquareEmpty(board, diagLeft) && board.getPiece(diagLeft).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagLeft).getTeamColor() != color) {
+                    return true;
+                }
+            }
+            if (isInBounds(diagRight)) {
+                if (!isSquareEmpty(board, diagRight) && board.getPiece(diagRight).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagRight).getTeamColor() != color) {
+                    return true;
+                }
+            }
+        } else {
+            ChessPosition diagRight = new ChessPosition(kingRow - 1, kingCol + 1);
+            ChessPosition diagLeft = new ChessPosition(kingRow - 1, kingCol - 1);
+            if (isInBounds(diagLeft)) {
+                if (!isSquareEmpty(board, diagLeft) && board.getPiece(diagLeft).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagLeft).getTeamColor() != color) {
+                    return true;
+                }
+            }
+            if (isInBounds(diagRight)) {
+                if (!isSquareEmpty(board, diagRight) && board.getPiece(diagRight).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagRight).getTeamColor() != color) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
