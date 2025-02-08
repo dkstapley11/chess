@@ -15,6 +15,20 @@ public class ChessBoard {
     public ChessBoard() {
         board = new ChessPiece[8][8];
     }
+
+    public ChessBoard(ChessBoard copy) {
+        board = new ChessPiece[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (copy.board[i][j] != null) {
+                    board[i][j] = new ChessPiece(copy.board[i][j]);
+                } else {
+                    board[i][j] = null;
+                }
+            }
+        }
+    }
+
     private void initializeBoard() {
         for (int i = 1; i <= 8; i++) {
             addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
