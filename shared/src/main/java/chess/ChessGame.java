@@ -172,25 +172,6 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = findKing(board, teamColor);
 
-//        for (int i = 1; i <= 8; i++) {
-//            for (int k = 1; k <= 8; k++) {
-//                ChessPosition currentPos = new ChessPosition(i, k);
-//                if (!isSquareEmpty(board, currentPos)) {
-//                    ChessPiece currentPiece = board.getPiece(currentPos);
-//                    TeamColor currentColor = currentPiece.getTeamColor();
-//                    if (currentColor != teamColor) {
-//                        Collection<ChessMove> opposingMoves = currentPiece.pieceMoves(board, currentPos);
-//                        for (ChessMove move : opposingMoves) {
-//                            if (move.getEndPosition().equals(kingPosition)) {
-//                                return true;
-//                            }
-//                        }
-//                    }
-//                }
-//
-//            }
-//        }
-
 
         // Check diagonal danger
         if (checkDiagonalDanger(kingPosition, teamColor, 1, 1) ||
