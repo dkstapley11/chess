@@ -8,6 +8,7 @@ import model.AuthData;
 import model.GameData;
 import model.GameResponse;
 import model.JoinRequest;
+import model.GameListResponse;
 
 import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
@@ -57,17 +58,6 @@ public class GameService {
         return new GameListResponse(games);
     }
 
-    private static class GameListResponse {
-        private HashSet<GameData> games;
-
-        public GameListResponse(HashSet<GameData> games) {
-            this.games = games;
-        }
-
-        public HashSet<GameData> getGames() {
-            return games;
-        }
-    }
 
     public boolean joinGame(String authToken, JoinRequest joinRequest) {
         AuthData auth;

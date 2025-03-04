@@ -2,7 +2,7 @@ package server;
 
 import Service.GameService;
 import com.google.gson.Gson;
-import model.GameData;
+import model.GameListResponse;
 import spark.Request;
 import spark.Response;
 
@@ -24,7 +24,7 @@ public class ListGamesHandler {
                 return gson.toJson(new ErrorResponse("Error: unauthorized"));
             }
 
-            HashSet<GameData> games = gameService.listGames(authToken);
+            GameListResponse games = gameService.listGames(authToken);
             res.status(200);
             return gson.toJson(games);
 

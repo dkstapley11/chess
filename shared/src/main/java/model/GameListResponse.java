@@ -1,4 +1,5 @@
 package model;
 
-public record GameListResponse() {
-}
+import java.util.HashSet;
+
+public record GameListResponse(HashSet<GameData> games) { }
