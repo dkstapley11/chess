@@ -1,6 +1,7 @@
 package server;
 
 import dataAccess.*;
+import model.UserData;
 import spark.*;
 import Service.GameService;
 import Service.UserService;
@@ -8,17 +9,17 @@ import Service.AuthService;
 
 public class Server {
 
-    UserDAO userDAO;
-    AuthDAO authDAO;
-    GameDAO gameDAO;
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
 
-    static UserService userService;
-    static GameService gameService;
-    static AuthService authService;
+    private UserService userService;
+    private GameService gameService;
+    private AuthService authService;
 
-    UserHandler userHandler;
-    GameHandler gameHandler;
-    AuthHandler authHandler;
+
+    private GameHandler gameHandler;
+    private RegisterHandler registerHandler;
 
     public Server() {
         userDAO = new RamUserDAO();
@@ -26,10 +27,9 @@ public class Server {
         gameDAO = new RamGameDAO();
 
         userService = new UserService(userDAO, authDAO);
-        gameService = new GameService(gameDAO, authDAO);
+        gameService = new GameService(authDAO, gameDAO);
 
-        userHandler = new UserHandler(userService);
-        gameHandler = new GameHandler(gameService);
+        registerHandler = new RegisterHandler(userService);
     }
 
     public int run(int desiredPort) {
@@ -37,14 +37,12 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
+        Spark.post("/user", registerHandler::register);
+
         // Register your endpoints and handle exceptions here.
 
         //This line initializes the server and can be removed once you have a functioning endpoint
         Spark.init();
-
-        new UserHandler().registerEndpoints();
-        new AuthHandler().registerEndpoints();
-        new GameHandler().registerEndpoints();
 
 
         Spark.awaitInitialization();

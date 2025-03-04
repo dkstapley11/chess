@@ -39,13 +39,13 @@ public class UserService {
         return authData;
     }
 
-    public AuthData loginUser(UserData userData) throws DataAccessException {
-        if (!uDAO.authenticateUser(userData.username(), userData.password())) {
+    public AuthData loginUser(String username, String password) throws DataAccessException {
+        if (!uDAO.authenticateUser(username, password)) {
             throw new DataAccessException("Error: Unauthorized");
         }
 
         String authToken = UUID.randomUUID().toString();
-        AuthData authData = new AuthData(userData.username(), authToken);
+        AuthData authData = new AuthData(username, authToken);
         aDAO.createAuth(authData);
         return authData;
     }
