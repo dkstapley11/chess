@@ -6,7 +6,6 @@ import dataAccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
 
-import javax.xml.crypto.Data;
 import java.util.UUID;
 
 public class UserService {
@@ -56,5 +55,6 @@ public class UserService {
 
     public void clearUsers() {
         uDAO.clear();
+        aDAO.clear();
     }
 }

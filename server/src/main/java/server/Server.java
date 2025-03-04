@@ -1,35 +1,37 @@
 package server;
 
 import dataAccess.*;
-import model.UserData;
 import spark.*;
 import Service.GameService;
 import Service.UserService;
-import Service.AuthService;
 
 public class Server {
 
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
-    private GameDAO gameDAO;
+    private final CreateGameHandler createGameHandler;
+    private final RegisterHandler registerHandler;
+    private final JoinGameHandler joinGameHandler;
+    private final ListGamesHandler listGamesHandler;
+    private final LoginHandler loginHandler;
+    private final LogoutHandler logoutHandler;
 
-    private UserService userService;
-    private GameService gameService;
-    private AuthService authService;
-
-
-    private GameHandler gameHandler;
-    private RegisterHandler registerHandler;
+    UserService userService;
+    GameService gameService;
 
     public Server() {
-        userDAO = new RamUserDAO();
-        authDAO = new RamAuthDAO();
-        gameDAO = new RamGameDAO();
+        UserDAO userDAO = new RamUserDAO();
+        AuthDAO authDAO = new RamAuthDAO();
+        GameDAO gameDAO = new RamGameDAO();
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
 
         registerHandler = new RegisterHandler(userService);
+        createGameHandler = new CreateGameHandler(gameService);
+        joinGameHandler = new JoinGameHandler(gameService);
+        listGamesHandler = new ListGamesHandler(gameService);
+        logoutHandler = new LogoutHandler(userService);
+        loginHandler = new LoginHandler(userService);
+
     }
 
     public int run(int desiredPort) {
@@ -38,6 +40,12 @@ public class Server {
         Spark.staticFiles.location("web");
 
         Spark.post("/user", registerHandler::register);
+        Spark.get("/game", listGamesHandler::listGames);
+        Spark.post("/game", createGameHandler::createGame);
+        Spark.put("/game", joinGameHandler::joinGame);
+        Spark.delete("/db", this::clear);
+        Spark.delete("/session", logoutHandler::logout);
+        Spark.post("/session", loginHandler::login);
 
         // Register your endpoints and handle exceptions here.
 
@@ -47,6 +55,13 @@ public class Server {
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    public Object clear(Request req, Response res) {
+        userService.clearUsers();
+        gameService.clearGames();
+        res.status(200);
+        return "{}";
     }
 
     public void stop() {

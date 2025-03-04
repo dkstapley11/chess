@@ -2,6 +2,8 @@ package dataAccess;
 
 import model.GameData;
 
+import java.util.HashSet;
+
 public interface GameDAO {
     void createGame(GameData game)throws DataAccessException;
 
@@ -12,5 +14,7 @@ public interface GameDAO {
     void clear();
 
     boolean gameExists(int gameID);
+
+    HashSet<GameData> listGames();
 
 }

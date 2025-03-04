@@ -53,4 +53,9 @@ public class RamGameDAO implements GameDAO {
         }
         return false;
     }
+
+    @Override
+    public HashSet<GameData> listGames() {
+        return database;
+    }
 }

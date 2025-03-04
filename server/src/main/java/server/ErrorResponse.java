@@ -1,7 +1,9 @@
 package server;
 
-public class ErrorResponse extends RuntimeException {
+public class ErrorResponse {
+    public String message;
+
     public ErrorResponse(String message) {
-        super(message);
+        this.message = message;
     }
 }
