@@ -1,6 +1,8 @@
 package dataAccess;
 
 import model.AuthData;
+import model.UserData;
+
 import java.util.HashSet;
 
 public class RamAuthDAO implements AuthDAO {
@@ -40,5 +42,10 @@ public class RamAuthDAO implements AuthDAO {
     @Override
     public void clear() {
         database.clear();
+    }
+
+    @Override
+    public HashSet<AuthData> listAuths() {
+        return new HashSet<>(database);
     }
 }

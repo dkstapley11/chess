@@ -1,5 +1,6 @@
 package dataAccess;
 
+import model.GameData;
 import model.UserData;
 import java.util.HashSet;
 
@@ -44,5 +45,10 @@ public class RamUserDAO implements UserDAO {
     @Override
     public void clear() {
         database.clear();
+    }
+
+    @Override
+    public HashSet<UserData> listUsers() {
+        return new HashSet<>(database);
     }
 }
