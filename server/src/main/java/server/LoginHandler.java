@@ -2,6 +2,7 @@ package server;
 
 import Service.UserService;
 import com.google.gson.Gson;
+import dataAccess.DataAccessException;
 import model.AuthData;
 import model.LoginRequest;
 import spark.Request;
@@ -24,15 +25,14 @@ public class LoginHandler {
                 return gson.toJson(new ErrorResponse("Error: bad request"));
             }
 
-            AuthData userResponse = userService.loginUser(loginRequest.username(), loginRequest.password());
-
-            if (userResponse == null) {
+            try {
+                AuthData userResponse = userService.loginUser(loginRequest.username(), loginRequest.password());
+                res.status(200);
+                return gson.toJson(userResponse);
+            } catch (DataAccessException e) { // Catch authentication failure
                 res.status(401);
-                return gson.toJson(new ErrorResponse("Error: invalid credentials"));
+                return gson.toJson(new ErrorResponse("Error: unauthorized"));
             }
-
-            res.status(200);
-            return gson.toJson(userResponse);
 
         } catch (Exception e) {
             res.status(500);
