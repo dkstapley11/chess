@@ -27,13 +27,14 @@ public class RamAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws DataAccessException {
         for (AuthData auth : database) {
             if (auth.authToken().equals(authToken)) {
                 database.remove(auth);
                 return;
             }
         }
+        throw new DataAccessException("User is not logged in");
     }
 
     @Override

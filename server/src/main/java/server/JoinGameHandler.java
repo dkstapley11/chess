@@ -2,6 +2,7 @@ package server;
 
 import Service.GameService;
 import com.google.gson.Gson;
+import dataAccess.DataAccessException;
 import model.GameData;
 import model.JoinRequest;
 import spark.Request;
@@ -26,18 +27,26 @@ public class JoinGameHandler {
             }
 
             JoinRequest joinRequest = gson.fromJson(req.body(), JoinRequest.class);
-            if (joinRequest == null || joinRequest.playerColor() == null) {
-                res.status(400);
-                return gson.toJson(new ErrorResponse("Error: bad request - missing playerColor or gameID"));
-            }
-            boolean joined = gameService.joinGame(authToken, joinRequest);
-            if (!joined) {
-                res.status(400);
-                return gson.toJson(new ErrorResponse("Error: could not join game"));
-            }
 
-            res.status(200);
-            return "{}";
+            try {
+                gameService.joinGame(authToken, joinRequest);
+                res.status(200);
+                return "{}"; // Success, no response body needed
+            } catch (DataAccessException e) {
+                String errorMessage = e.getMessage();
+
+                if (errorMessage.contains("unauthorized")) {
+                    res.status(401);
+                } else if (errorMessage.contains("bad request") || errorMessage.contains("ID")) {
+                    res.status(400);
+                } else if (errorMessage.contains("already taken")) {
+                    res.status(403);
+                } else {
+                    res.status(500); // Catch-all for unexpected server errors
+                }
+
+                return gson.toJson(new ErrorResponse(errorMessage));
+            }
 
         } catch (Exception e) {
             res.status(500);

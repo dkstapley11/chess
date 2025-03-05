@@ -2,6 +2,7 @@ package server;
 
 import Service.UserService;
 import com.google.gson.Gson;
+import dataAccess.DataAccessException;
 import model.AuthData;
 import model.LoginRequest;
 import spark.Request;
@@ -23,10 +24,15 @@ public class LogoutHandler {
                 res.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized"));
             }
-            userService.logoutUser(authToken);
+            try {
+                userService.logoutUser(authToken);
 
-            res.status(200);
-            return "{}";
+                res.status(200);
+                return "{}";
+            } catch (DataAccessException e) {
+                res.status(401);
+                return gson.toJson(new ErrorResponse("Error: " + e.getMessage()));
+            }
 
         } catch (Exception e) {
             res.status(500);

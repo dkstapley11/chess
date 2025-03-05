@@ -22,7 +22,7 @@ public class RamGameDAO implements GameDAO {
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         for (GameData game : database) {
-            if (game.gameId() == gameID) {
+            if (game.gameID() == gameID) {
                 return game;
             }
         }
@@ -32,7 +32,7 @@ public class RamGameDAO implements GameDAO {
     @Override
     public void updateGame(GameData game) {
         try {
-            database.remove(getGame(game.gameId()));
+            database.remove(getGame(game.gameID()));
             database.add(game);
         } catch (DataAccessException e) {
             database.add(game);
@@ -47,7 +47,7 @@ public class RamGameDAO implements GameDAO {
     @Override
     public boolean gameExists(int gameID) {
         for (GameData game : database) {
-            if (game.gameId() == gameID) {
+            if (game.gameID() == gameID) {
                 return true;
             }
         }
@@ -56,6 +56,6 @@ public class RamGameDAO implements GameDAO {
 
     @Override
     public HashSet<GameData> listGames() {
-        return database;
+        return new HashSet<>(database);
     }
 }
