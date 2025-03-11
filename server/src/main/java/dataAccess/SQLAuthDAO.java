@@ -5,6 +5,7 @@ import model.AuthData;
 import java.util.HashSet;
 
 public class SQLAuthDAO implements AuthDAO {
+
     @Override
     public void createAuth(AuthData auth) {
 
