@@ -18,7 +18,12 @@ public class Server {
     GameService gameService;
 
     public Server() {
-        UserDAO userDAO = new RamUserDAO();
+        UserDAO userDAO;
+        try {
+            userDAO = new SQLUserDAO();
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
         AuthDAO authDAO = new RamAuthDAO();
         GameDAO gameDAO = new RamGameDAO();
 
