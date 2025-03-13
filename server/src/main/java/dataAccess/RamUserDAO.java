@@ -13,27 +13,27 @@ public class RamUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) throws ResponseException {
         for (UserData user : database) {
             if (user.username().equals(username)) {
                 return user;
             }
         }
-        throw new DataAccessException("User not found: " + username);
+        throw new ResponseException(500 ,"User not found: " + username);
     }
 
     @Override
-    public void insertUser(UserData userData) throws DataAccessException {
+    public void insertUser(UserData userData) throws ResponseException {
         for (UserData user : database) {
             if (user.username().equals(userData.username())) {
-                throw new DataAccessException("User already exists: " + userData.username());
+                throw new ResponseException(401 ,"User already exists: " + userData.username());
             }
         }
         database.add(userData);
     }
 
     @Override
-    public boolean authenticateUser(String username, String password) throws DataAccessException {
+    public boolean authenticateUser(String username, String password) throws ResponseException {
         for (UserData user : database) {
             if (user.username().equals(username) && user.password().equals(password)) {
                 return true;
