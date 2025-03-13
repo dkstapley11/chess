@@ -9,5 +9,5 @@ public interface UserDAO {
     UserData getUser(String username) throws ResponseException;
     boolean authenticateUser(String username, String password) throws ResponseException;
     void clear() throws ResponseException;
-    HashSet<UserData> listUsers();
+    HashSet<UserData> listUsers() throws ResponseException;
 }

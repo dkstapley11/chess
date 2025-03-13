@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
+import dataAccess.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.GameResponse;
@@ -22,11 +23,11 @@ public class GameService {
         this.gDAO = gDAO;
     }
 
-    public GameResponse createGame(String gameName, String authToken) throws DataAccessException {
+    public GameResponse createGame(String gameName, String authToken) throws ResponseException {
         try {
             aDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-            throw new DataAccessException("Error: Invalid authentication token");
+            throw new ResponseException(401, "Error: Invalid authentication token");
         }
 
         int gameID;
@@ -40,8 +41,8 @@ public class GameService {
             board.resetBoard();
             game.setBoard(board);
             gDAO.createGame(new GameData(gameID, null, null, gameName, game));
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (ResponseException e) {
+            throw new ResponseException(500, "could not create game");
         }
         GameResponse res;
         res = new GameResponse(gameID);
@@ -59,20 +60,20 @@ public class GameService {
     }
 
 
-    public boolean joinGame(String authToken, JoinRequest joinRequest) throws DataAccessException {
+    public boolean joinGame(String authToken, JoinRequest joinRequest) throws ResponseException {
         AuthData auth;
         GameData game;
 
         try {
             auth = aDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-            throw new DataAccessException("Error: unauthorized");
+            throw new ResponseException(401, "Error: unauthorized");
         }
 
         try {
             game = gDAO.getGame(joinRequest.gameID());
-        } catch (DataAccessException e) {
-            throw new DataAccessException("Error: A game with that ID doesn't exist");
+        } catch (ResponseException e) {
+            throw new ResponseException(403, "Error: A game with that ID doesn't exist");
         }
 
         String white = game.whiteUsername();
@@ -84,31 +85,31 @@ public class GameService {
         if (playerColor != null) {
             playerColor = playerColor.toUpperCase(); // Normalize case
         } else {
-            throw new DataAccessException("Error: bad request: null color provided");
+            throw new ResponseException(403, "Error: bad request: null color provided");
         }
 
         // Validate the color choice
         if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
-            throw new DataAccessException("Error: bad request: Invalid player color. Choose 'WHITE' or 'BLACK'.");
+            throw new ResponseException(403, "Error: bad request: Invalid player color. Choose 'WHITE' or 'BLACK'.");
         }
 
         // Check if the player can join the game
         if ("WHITE".equals(playerColor)) {
             if (white != null) {
-                throw new DataAccessException("Error: White player slot is already taken.");
+                throw new ResponseException(403, "Error: White player slot is already taken.");
             }
             game = new GameData(game.gameID(), username, black, game.gameName(), game.game()); // Assign to white
         } else if ("BLACK".equals(playerColor)) {
             if (black != null) {
-                throw new DataAccessException("Error: Black player slot is already taken.");
+                throw new ResponseException(401, "Error: Black player slot is already taken.");
             }
             game = new GameData(game.gameID(), white, username, game.gameName(), game.game()); // Assign to black
         }
 
         try {
             gDAO.updateGame(game);
-        } catch (DataAccessException e) {
-            throw new DataAccessException("Error: failed to update game");
+        } catch (ResponseException e) {
+            throw new ResponseException(500, "Error: failed to update game");
         }
         return true;
     }

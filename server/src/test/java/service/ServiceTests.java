@@ -117,7 +117,7 @@ public class ServiceTests {
 
     // Test clearUsers() - Positive Case
     @Test
-    public void testClearUsers() {
+    public void testClearUsers() throws ResponseException {
         userService.clearUsers();
 
         // Check if the users have been cleared

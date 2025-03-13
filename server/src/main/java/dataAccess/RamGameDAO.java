@@ -20,13 +20,13 @@ public class RamGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) throws ResponseException {
         for (GameData game : database) {
             if (game.gameID() == gameID) {
                 return game;
             }
         }
-        throw new DataAccessException("Game id not found: " +gameID);
+        throw new ResponseException(400, "Game id not found: " +gameID);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class RamGameDAO implements GameDAO {
         try {
             database.remove(getGame(game.gameID()));
             database.add(game);
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             database.add(game);
         }
     }
