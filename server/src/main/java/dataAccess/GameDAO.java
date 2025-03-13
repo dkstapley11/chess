@@ -1,7 +1,6 @@
 package dataAccess;
 
 import model.GameData;
-import spark.Response;
 
 import java.util.HashSet;
 
