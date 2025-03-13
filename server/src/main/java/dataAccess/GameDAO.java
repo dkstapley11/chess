@@ -1,6 +1,7 @@
 package dataAccess;
 
 import model.GameData;
+import spark.Response;
 
 import java.util.HashSet;
 
@@ -11,10 +12,10 @@ public interface GameDAO {
 
     void updateGame(GameData game) throws ResponseException;
 
-    void clear();
+    void clear() throws ResponseException;
 
-    boolean gameExists(int gameID);
+    boolean gameExists(int gameID) throws ResponseException;
 
-    HashSet<GameData> listGames();
+    HashSet<GameData> listGames() throws ResponseException;
 
 }

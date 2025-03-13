@@ -19,9 +19,8 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void createGame(GameData game) throws ResponseException {
-        var statement = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?, ?)";
-        var json = new Gson().toJson(game);
-        executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?)";
+        executeUpdate(statement, game.whiteUsername(), game.blackUsername(), game.gameName(), serializeGame(game.game()));
     }
 
     @Override
@@ -55,22 +54,47 @@ public class SQLGameDAO implements GameDAO {
     @Override
     public void updateGame(GameData game) throws ResponseException {
         var statement = "UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, chessGame=? WHERE gameID=?";
+        String textGame = serializeGame(game.game());
+        executeUpdate(statement, game.whiteUsername(), game.blackUsername(), game.gameName(), textGame, game.gameID());
+    }
+
+    @Override
+    public void clear() throws ResponseException {
+        var statement = "TRUNCATE game";
         executeUpdate(statement);
     }
 
     @Override
-    public void clear() {
-        var statement = "TRUNCATE game";
+    public boolean gameExists(int gameID) throws ResponseException {
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT 1 FROM game WHERE gameID = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (SQLException e) {
+            throw new ResponseException(500, "Error checking game existence: " + e.getMessage());
+        }
     }
 
     @Override
-    public boolean gameExists(int gameID) {
-        return false;
-    }
-
-    @Override
-    public HashSet<GameData> listGames() {
-        return null;
+    public HashSet<GameData> listGames() throws ResponseException {
+        var games = new HashSet<GameData>();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM game";
+            try (var ps = conn.prepareStatement(statement);
+                 var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    games.add(readGame(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new ResponseException(500, "Unable to retrieve games: " + e.getMessage());
+        }
+        return games;
     }
 
     private String serializeGame(ChessGame game) {
@@ -88,7 +112,6 @@ public class SQLGameDAO implements GameDAO {
                     var param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof GameData p) ps.setString(i + 1, p.toString());
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
@@ -108,7 +131,7 @@ public class SQLGameDAO implements GameDAO {
     private final String[] createStatements = {
             """            
             CREATE TABLE if NOT EXISTS game (
-            gameID INT NOT NULL,
+            gameID INT NOT NULL AUTO_INCREMENT,
             whiteUsername VARCHAR(256),
             blackUsername VARCHAR(256),
             gameName VARCHAR(256),
