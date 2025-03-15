@@ -2,12 +2,10 @@ package server;
 
 import Service.GameService;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
+import dataAccess.ResponseException;
 import model.GameResponse;
 import spark.Request;
 import spark.Response;
-
-import javax.xml.crypto.Data;
 
 public class CreateGameHandler {
 
@@ -18,7 +16,7 @@ public class CreateGameHandler {
         this.gameService = gameService;
     }
 
-    public Object createGame(Request req, Response res) throws DataAccessException {
+    public Object createGame(Request req, Response res) throws ResponseException {
         try {
             // Parse request body into a helper object
             GameRequest gameRequest = gson.fromJson(req.body(), GameRequest.class);
@@ -35,7 +33,7 @@ public class CreateGameHandler {
                 GameResponse gameResponse = gameService.createGame(gameRequest.gameName, authToken);
                 res.status(200);
                 return gson.toJson(gameResponse);
-            } catch (DataAccessException e) {
+            } catch (ResponseException e) {
                 res.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized"));
             }

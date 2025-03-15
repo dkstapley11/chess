@@ -2,10 +2,7 @@ package server;
 
 import Service.UserService;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
 import dataAccess.ResponseException;
-import model.AuthData;
-import model.LoginRequest;
 import spark.Request;
 import spark.Response;
 
@@ -30,7 +27,7 @@ public class LogoutHandler {
 
                 res.status(200);
                 return "{}";
-            } catch (DataAccessException e) {
+            } catch (ResponseException e) {
                 res.status(401);
                 return gson.toJson(new ErrorResponse("Error: " + e.getMessage()));
             }

@@ -2,7 +2,7 @@ package server;
 
 import Service.UserService;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
+import dataAccess.ResponseException;
 import model.AuthData;
 import model.LoginRequest;
 import spark.Request;
@@ -29,7 +29,7 @@ public class LoginHandler {
                 AuthData userResponse = userService.loginUser(loginRequest.username(), loginRequest.password());
                 res.status(200);
                 return gson.toJson(userResponse);
-            } catch (DataAccessException e) { // Catch authentication failure
+            } catch (ResponseException e) { // Catch authentication failure
                 res.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized"));
             }

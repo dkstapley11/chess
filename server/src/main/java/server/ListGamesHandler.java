@@ -2,7 +2,7 @@ package server;
 
 import Service.GameService;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
+import dataAccess.ResponseException;
 import model.GameListResponse;
 import spark.Request;
 import spark.Response;
@@ -29,7 +29,7 @@ public class ListGamesHandler {
                 GameListResponse games = gameService.listGames(authToken);
                 res.status(200);
                 return gson.toJson(games);
-            } catch (DataAccessException e) {
+            } catch (ResponseException e) {
                 res.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized"));
             }

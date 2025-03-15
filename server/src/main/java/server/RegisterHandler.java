@@ -2,7 +2,7 @@ package server;
 
 import Service.UserService;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
+import dataAccess.ResponseException;
 import model.AuthData;
 import model.UserData;
 import spark.Request;
@@ -30,7 +30,7 @@ public class RegisterHandler {
                 AuthData userResponse = userService.registerUser(userData);
                 res.status(200);
                 return gson.toJson(userResponse);
-            } catch (DataAccessException e) { // Catch user already exists error
+            } catch (ResponseException e) { // Catch user already exists error
                 res.status(403);
                 return gson.toJson(new ErrorResponse("Error: already taken"));
             }
