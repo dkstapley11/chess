@@ -59,8 +59,19 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public HashSet<AuthData> listAuths() {
-        return null;
+    public HashSet<AuthData> listAuths() throws ResponseException {
+
+        HashSet<AuthData> users = new HashSet<>();
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement("SELECT username, password, email FROM users");
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                users.add(readAuth(rs));
+            }
+        } catch (SQLException e) {
+            throw new ResponseException(500, "Unable to list users: " + e.getMessage());
+        }
+        return users;
     }
 
     private int executeUpdate(String statement, Object... params) throws ResponseException {
