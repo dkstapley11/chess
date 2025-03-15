@@ -19,8 +19,8 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void createGame(GameData game) throws ResponseException {
-        var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?)";
-        executeUpdate(statement, game.whiteUsername(), game.blackUsername(), game.gameName(), serializeGame(game.game()));
+        var statement = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?, ?)";
+        executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), serializeGame(game.game()));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class SQLGameDAO implements GameDAO {
     private final String[] createStatements = {
             """            
             CREATE TABLE if NOT EXISTS game (
-            gameID INT NOT NULL AUTO_INCREMENT,
+            gameID INT NOT NULL,
             whiteUsername VARCHAR(256),
             blackUsername VARCHAR(256),
             gameName VARCHAR(256),

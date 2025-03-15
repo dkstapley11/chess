@@ -65,12 +65,16 @@ public class SQLUserDAO implements UserDAO {
     private boolean passwordMatches(String cleanPW, String username) throws ResponseException {
         var hashedPassword = getUserPassword(username);
 
+        if (hashedPassword == null) {
+            return false;  // Or throw an exception if needed
+        }
+
         return BCrypt.checkpw(cleanPW, hashedPassword);
     }
 
     private String getUserPassword(String username) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT password FROM users WHERE username=?";
+            var statement = "SELECT password FROM user WHERE username=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (var rs = ps.executeQuery()) {
@@ -89,7 +93,7 @@ public class SQLUserDAO implements UserDAO {
     public HashSet<UserData> listUsers() throws ResponseException {
         HashSet<UserData> users = new HashSet<>();
         try (var conn = DatabaseManager.getConnection();
-             var ps = conn.prepareStatement("SELECT username, password, email FROM users");
+             var ps = conn.prepareStatement("SELECT username, password, email FROM user");
              var rs = ps.executeQuery()) {
             while (rs.next()) {
                 users.add(readUser(rs));

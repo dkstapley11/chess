@@ -22,7 +22,7 @@ public class UserService {
             throw new ResponseException(400, "Error: bad request");
         }
 
-        uDAO.getUser(userData.username());
+//        uDAO.getUser(userData.username());
 
         UserData newUser = new UserData(userData.username(), userData.password(), userData.email());
         uDAO.insertUser(newUser);

@@ -24,9 +24,8 @@ public class GameService {
     }
 
     public GameResponse createGame(String gameName, String authToken) throws ResponseException {
-        try {
-            aDAO.getAuth(authToken);
-        } catch (ResponseException e) {
+
+        if (aDAO.getAuth(authToken) == null) {
             throw new ResponseException(401, "Error: Invalid authentication token");
         }
 
@@ -50,11 +49,10 @@ public class GameService {
     }
 
     public GameListResponse listGames(String authToken) throws ResponseException {
-        try {
-            aDAO.getAuth(authToken);
-        } catch (ResponseException e) {
+        if (aDAO.getAuth(authToken) == null) {
             throw new ResponseException(401, "Error: Invalid authentication token");
         }
+
         HashSet<GameData> games = gDAO.listGames();
         return new GameListResponse(games);
     }
@@ -66,14 +64,20 @@ public class GameService {
 
         try {
             auth = aDAO.getAuth(authToken);
+            if (auth == null) {
+                throw new ResponseException(401, "Auth does not exist");
+            }
         } catch (ResponseException e) {
             throw new ResponseException(401, "Error: unauthorized");
         }
 
         try {
             game = gDAO.getGame(joinRequest.gameID());
+            if (game == null) {
+                throw new ResponseException(400, "Game id not found");
+            }
         } catch (ResponseException e) {
-            throw new ResponseException(403, "Error: A game with that ID doesn't exist");
+            throw new ResponseException(400, "Error: A game with that ID doesn't exist");
         }
 
         String white = game.whiteUsername();
