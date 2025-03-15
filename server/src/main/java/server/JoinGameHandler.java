@@ -3,6 +3,7 @@ package server;
 import Service.GameService;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import dataAccess.ResponseException;
 import model.GameData;
 import model.JoinRequest;
 import spark.Request;
@@ -32,18 +33,10 @@ public class JoinGameHandler {
                 gameService.joinGame(authToken, joinRequest);
                 res.status(200);
                 return "{}"; // Success, no response body needed
-            } catch (DataAccessException e) {
+            } catch (ResponseException e) {
                 String errorMessage = e.getMessage();
-
-                if (errorMessage.contains("unauthorized")) {
-                    res.status(401);
-                } else if (errorMessage.contains("bad request") || errorMessage.contains("ID")) {
-                    res.status(400);
-                } else if (errorMessage.contains("already taken")) {
-                    res.status(403);
-                } else {
-                    res.status(500); // Catch-all for unexpected server errors
-                }
+                int code = e.StatusCode();
+                res.status(code);
 
                 return gson.toJson(new ErrorResponse(errorMessage));
             }

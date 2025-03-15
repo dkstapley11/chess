@@ -95,12 +95,12 @@ public class GameService {
         // Check if the player can join the game
         if ("WHITE".equals(playerColor)) {
             if (white != null) {
-                throw new ResponseException(401, "Error: White player slot is already taken.");
+                throw new ResponseException(403, "Error: White player slot is already taken.");
             }
             game = new GameData(game.gameID(), username, black, game.gameName(), game.game()); // Assign to white
         } else if ("BLACK".equals(playerColor)) {
             if (black != null) {
-                throw new ResponseException(401, "Error: Black player slot is already taken.");
+                throw new ResponseException(403, "Error: Black player slot is already taken.");
             }
             game = new GameData(game.gameID(), white, username, game.gameName(), game.game()); // Assign to black
         }

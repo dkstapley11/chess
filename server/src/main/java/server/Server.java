@@ -19,13 +19,17 @@ public class Server {
 
     public Server() {
         UserDAO userDAO;
+        AuthDAO authDAO;
+        GameDAO gameDAO;
         try {
             userDAO = new SQLUserDAO();
+            authDAO = new SQLAuthDAO();
+            gameDAO = new SQLGameDAO();
         } catch (ResponseException e) {
             throw new RuntimeException(e);
         }
-        AuthDAO authDAO = new RamAuthDAO();
-        GameDAO gameDAO = new RamGameDAO();
+
+
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);

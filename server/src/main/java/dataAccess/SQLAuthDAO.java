@@ -24,7 +24,7 @@ public class SQLAuthDAO implements AuthDAO {
     @Override
     public AuthData getAuth(String authToken) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, password, email FROM user WHERE username=?";
+            var statement = "SELECT username, authToken FROM auth WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
                 try (var rs = ps.executeQuery()) {
@@ -62,7 +62,7 @@ public class SQLAuthDAO implements AuthDAO {
 
         HashSet<AuthData> users = new HashSet<>();
         try (var conn = DatabaseManager.getConnection();
-             var ps = conn.prepareStatement("SELECT username, password, email FROM users");
+             var ps = conn.prepareStatement("SELECT username, authToken FROM auth");
              var rs = ps.executeQuery()) {
             while (rs.next()) {
                 users.add(readAuth(rs));
@@ -80,7 +80,6 @@ public class SQLAuthDAO implements AuthDAO {
                     var param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof AuthData p) ps.setString(i + 1, p.toString());
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
