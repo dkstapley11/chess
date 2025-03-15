@@ -42,14 +42,13 @@ public class ServiceTests {
         try {
            AuthData authData = userService.registerUser(existingUser);
            existingAuth = authData.authToken();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (ResponseException e) {
         }
     }
 
     // Test registerUser() - Positive Case
     @Test
-    public void testRegisterUserSuccess() throws DataAccessException {
+    public void testRegisterUserSuccess() throws ResponseException {
         AuthData authData = userService.registerUser(newUser);
 
         assertNotNull(authData);
@@ -77,7 +76,7 @@ public class ServiceTests {
 
     // Test loginUser() - Positive Case
     @Test
-    public void testLoginUserSuccess() throws DataAccessException {
+    public void testLoginUserSuccess() throws ResponseException {
         AuthData authData = userService.loginUser(existingUser.username(), existingUser.password());
 
         assertNotNull(authData);
@@ -95,7 +94,7 @@ public class ServiceTests {
 
     // Test logoutUser() - Positive Case
     @Test
-    public void testLogoutUserSuccess() throws DataAccessException {
+    public void testLogoutUserSuccess() throws ResponseException {
         // Assuming authToken is valid and exists
         userService.logoutUser(existingAuth);
 
@@ -127,7 +126,7 @@ public class ServiceTests {
 
     // Test createGame() - Positive Case
     @Test
-    public void testCreateGameSuccess() throws DataAccessException {
+    public void testCreateGameSuccess() throws ResponseException {
 
         GameResponse response = gameService.createGame("testGame", existingAuth);
 
@@ -148,7 +147,7 @@ public class ServiceTests {
 
     // Test listGames() - Positive Case
     @Test
-    public void testListGamesSuccess() throws DataAccessException {
+    public void testListGamesSuccess() throws ResponseException {
         gameService.createGame("testGame2", existingAuth);
 
         GameListResponse response = gameService.listGames(existingAuth);
@@ -169,7 +168,7 @@ public class ServiceTests {
 
     // Test joinGame() - Positive Case
     @Test
-    public void testJoinGameSuccess() throws DataAccessException {
+    public void testJoinGameSuccess() throws ResponseException {
         GameResponse response = gameService.createGame("testGame3", existingAuth);
         int gameID = response.gameID();
 
@@ -194,7 +193,7 @@ public class ServiceTests {
 
     // Test clearGames() - Positive Case
     @Test
-    public void testClearGames() {
+    public void testClearGames() throws ResponseException {
         gameService.clearGames();
 
         // Assume you have access to the DAO or you can check the database

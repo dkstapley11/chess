@@ -56,7 +56,7 @@ public class Server {
         return Spark.port();
     }
 
-    public Object clear(Request req, Response res) {
+    public Object clear(Request req, Response res) throws ResponseException {
         userService.clearUsers();
         gameService.clearGames();
         res.status(200);

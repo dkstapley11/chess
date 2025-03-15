@@ -6,13 +6,13 @@ import java.util.HashSet;
 
 // CRUD operations
 public interface AuthDAO {
-    void createAuth(AuthData auth);
+    void createAuth(AuthData auth) throws ResponseException;
 
-    AuthData getAuth(String authToken) throws DataAccessException;
+    AuthData getAuth(String authToken) throws ResponseException;
 
-    void deleteAuth(String authToken) throws DataAccessException;
+    void deleteAuth(String authToken) throws ResponseException;
 
-    void clear();
+    void clear() throws ResponseException;
 
-    HashSet<AuthData> listAuths();
+    HashSet<AuthData> listAuths() throws ResponseException;
 }

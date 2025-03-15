@@ -3,6 +3,7 @@ package server;
 import Service.UserService;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import dataAccess.ResponseException;
 import model.AuthData;
 import model.LoginRequest;
 import spark.Request;
@@ -16,7 +17,7 @@ public class LogoutHandler {
         this.userService = userService;
     }
 
-    public Object logout(Request req, Response res) {
+    public Object logout(Request req, Response res) throws ResponseException {
         try {
 
             String authToken = req.headers("authorization");

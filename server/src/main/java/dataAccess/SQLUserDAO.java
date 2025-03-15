@@ -20,7 +20,6 @@ public class SQLUserDAO implements UserDAO {
     @Override
     public void insertUser(UserData userData) throws ResponseException {
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        var json = new Gson().toJson(userData);
         executeUpdate(statement, userData.username(), hashPassword(userData.password()), userData.email());
     }
 

@@ -1,6 +1,7 @@
 package Service;
 
 import dataAccess.AuthDAO;
+import dataAccess.ResponseException;
 import dataAccess.UserDAO;
 import dataAccess.DataAccessException;
 import model.UserData;
@@ -17,16 +18,12 @@ public class UserService {
         this.aDAO = aDAO;
     }
 
-    public AuthData registerUser(UserData userData) throws DataAccessException {
+    public AuthData registerUser(UserData userData) throws ResponseException {
         if (userData.username() == null || userData.password() == null || userData.email() == null || userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()) {
-            throw new DataAccessException("Error: bad request");
+            throw new ResponseException(400, "Error: bad request");
         }
 
-        try {
-            uDAO.getUser(userData.username());
-            throw new DataAccessException("Error: already taken");
-        } catch (DataAccessException e) {
-        }
+        uDAO.getUser(userData.username());
 
         UserData newUser = new UserData(userData.username(), userData.password(), userData.email());
         uDAO.insertUser(newUser);
@@ -38,9 +35,9 @@ public class UserService {
         return authData;
     }
 
-    public AuthData loginUser(String username, String password) throws DataAccessException {
+    public AuthData loginUser(String username, String password) throws ResponseException {
         if (!uDAO.authenticateUser(username, password)) {
-            throw new DataAccessException("Error: Unauthorized");
+            throw new ResponseException(401, "Error: Unauthorized");
         }
 
         String authToken = UUID.randomUUID().toString();
@@ -49,11 +46,11 @@ public class UserService {
         return authData;
     }
 
-    public void logoutUser(String authToken) throws DataAccessException {
+    public void logoutUser(String authToken) throws ResponseException {
         aDAO.deleteAuth(authToken);
     }
 
-    public void clearUsers() {
+    public void clearUsers() throws ResponseException {
         uDAO.clear();
         aDAO.clear();
     }

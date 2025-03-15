@@ -26,7 +26,7 @@ public class GameService {
     public GameResponse createGame(String gameName, String authToken) throws ResponseException {
         try {
             aDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             throw new ResponseException(401, "Error: Invalid authentication token");
         }
 
@@ -49,11 +49,11 @@ public class GameService {
         return res;
     }
 
-    public GameListResponse listGames(String authToken) throws DataAccessException {
+    public GameListResponse listGames(String authToken) throws ResponseException {
         try {
             aDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
-            throw new DataAccessException("Error: Invalid authentication token");
+        } catch (ResponseException e) {
+            throw new ResponseException(401, "Error: Invalid authentication token");
         }
         HashSet<GameData> games = gDAO.listGames();
         return new GameListResponse(games);
@@ -66,7 +66,7 @@ public class GameService {
 
         try {
             auth = aDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
+        } catch (ResponseException e) {
             throw new ResponseException(401, "Error: unauthorized");
         }
 
@@ -80,23 +80,22 @@ public class GameService {
         String black = game.blackUsername();
         String username = auth.username();
 
-        // Handle player color selection
         String playerColor = joinRequest.playerColor();
         if (playerColor != null) {
             playerColor = playerColor.toUpperCase(); // Normalize case
         } else {
-            throw new ResponseException(403, "Error: bad request: null color provided");
+            throw new ResponseException(400, "Error: bad request: null color provided");
         }
 
         // Validate the color choice
         if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
-            throw new ResponseException(403, "Error: bad request: Invalid player color. Choose 'WHITE' or 'BLACK'.");
+            throw new ResponseException(400, "Error: bad request: Invalid player color. Choose 'WHITE' or 'BLACK'.");
         }
 
         // Check if the player can join the game
         if ("WHITE".equals(playerColor)) {
             if (white != null) {
-                throw new ResponseException(403, "Error: White player slot is already taken.");
+                throw new ResponseException(401, "Error: White player slot is already taken.");
             }
             game = new GameData(game.gameID(), username, black, game.gameName(), game.game()); // Assign to white
         } else if ("BLACK".equals(playerColor)) {
@@ -114,7 +113,7 @@ public class GameService {
         return true;
     }
 
-    public void clearGames() {
+    public void clearGames() throws ResponseException {
         gDAO.clear();
     }
 }

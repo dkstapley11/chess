@@ -19,24 +19,24 @@ public class RamAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData getAuth(String authToken) throws DataAccessException {
+    public AuthData getAuth(String authToken) throws ResponseException {
         for (AuthData auth : database) {
             if (auth.authToken().equals(authToken)) {
                 return auth;
             }
         };
-        throw new DataAccessException("Auth token does not exist: " + authToken);
+        throw new ResponseException(401, "Auth token does not exist: " + authToken);
     }
 
     @Override
-    public void deleteAuth(String authToken) throws DataAccessException {
+    public void deleteAuth(String authToken) throws ResponseException {
         for (AuthData auth : database) {
             if (auth.authToken().equals(authToken)) {
                 database.remove(auth);
                 return;
             }
         }
-        throw new DataAccessException("User is not logged in");
+        throw new ResponseException(500, "User is not logged in");
     }
 
     @Override
