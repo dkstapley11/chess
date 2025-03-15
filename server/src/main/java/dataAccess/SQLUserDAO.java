@@ -1,6 +1,5 @@
 package dataAccess;
 
-import com.google.gson.Gson;
 import model.UserData;
 import org.mindrot.jbcrypt.*;
 
