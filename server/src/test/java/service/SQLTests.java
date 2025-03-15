@@ -97,18 +97,18 @@ public class SQLTests {
         });
     }
 
-    // Test logoutUser() - Positive Case
-//    @Test
-//    public void testLogoutUserSuccess() throws ResponseException {
-//        // Assuming authToken is valid and exists
-//        System.out.println("TESTING LOGOUT WITH THIS AUTH: " + existingAuth);
-//        userService.logoutUser(existingAuth);
-//
-//        // Verify that the token has been removed (check DAO)
-//        assertNull(authDAO.getAuth(existingAuth));
-//    }
+//     Test logoutUser() - Positive Case
+    @Test
+    public void testLogoutUserSuccess() throws ResponseException {
+        // Assuming authToken is valid and exists
+        System.out.println("TESTING LOGOUT WITH THIS AUTH: " + existingAuth);
+        userService.logoutUser(existingAuth);
 
-    // Test logoutUser() - Negative Case (Invalid Token)
+        // Verify that the token has been removed (check DAO)
+        assertNull(authDAO.getAuth(existingAuth));
+    }
+
+//     Test logoutUser() - Negative Case (Invalid Token)
     @Test
     public void testLogoutUserFailureInvalidToken() {
         String invalidAuthToken = "invalidToken";
@@ -119,14 +119,14 @@ public class SQLTests {
     }
 
     // Test clearUsers() - Positive Case
-//    @Test
-//    public void testClearUsers() throws ResponseException {
-//        userService.clearUsers();
-//
-//        // Check if the users have been cleared
-//        assertTrue(userDAO.listUsers().isEmpty());
-//        assertTrue(authDAO.listAuths().isEmpty());
-//    }
+    @Test
+    public void testClearUsers() throws ResponseException {
+        userService.clearUsers();
+
+        // Check if the users have been cleared
+        assertTrue(userDAO.listUsers().isEmpty());
+        assertTrue(authDAO.listAuths().isEmpty());
+    }
 
     // Test createGame() - Positive Case
     @Test
