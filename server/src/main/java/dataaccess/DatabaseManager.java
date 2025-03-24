@@ -1,4 +1,4 @@
-package dataAccess;
+package dataaccess;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -9,10 +9,10 @@ import java.util.Properties;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class DatabaseManager {
-    private static final String databaseName;
-    private static final String user;
-    private static final String password;
-    private static final String connectionUrl;
+    private static final String DatabaseName;
+    private static final String User;
+    private static final String Password;
+    private static final String ConnectionUrl;
 
     /*
      * Load the database information for the db.properties file.
@@ -22,13 +22,13 @@ public class DatabaseManager {
             try (InputStream in = DatabaseManager.class.getClassLoader().getResourceAsStream("db.properties")) {
                 Properties props = new Properties();
                 props.load(in);
-                databaseName = props.getProperty("db.name");
-                user = props.getProperty("db.user");
-                password = props.getProperty("db.password");
+                DatabaseName = props.getProperty("db.name");
+                User = props.getProperty("db.user");
+                Password = props.getProperty("db.password");
 
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
-                connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+                ConnectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
 
             }
         } catch (Exception ex) {
@@ -41,8 +41,8 @@ public class DatabaseManager {
      */
     static void createDatabase() throws ResponseException {
         try {
-            var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
-            var conn = DriverManager.getConnection(connectionUrl, user, password);
+            var statement = "CREATE DATABASE IF NOT EXISTS " + DatabaseName;
+            var conn = DriverManager.getConnection(ConnectionUrl, User, Password);
             try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 preparedStatement.executeUpdate();
             }
@@ -65,8 +65,8 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws ResponseException {
         try {
-            var conn = DriverManager.getConnection(connectionUrl, user, password);
-            conn.setCatalog(databaseName);
+            var conn = DriverManager.getConnection(ConnectionUrl, User, Password);
+            conn.setCatalog(DatabaseName);
             return conn;
         } catch (SQLException e) {
             throw new ResponseException(500, e.getMessage());

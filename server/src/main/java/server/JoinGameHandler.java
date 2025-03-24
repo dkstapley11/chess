@@ -1,15 +1,11 @@
 package server;
 
-import Service.GameService;
+import service.GameService;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
-import dataAccess.ResponseException;
-import model.GameData;
+import dataaccess.ResponseException;
 import model.JoinRequest;
 import spark.Request;
 import spark.Response;
-
-import java.util.HashSet;
 
 public class JoinGameHandler {
     private GameService gameService;
@@ -35,7 +31,7 @@ public class JoinGameHandler {
                 return "{}"; // Success, no response body needed
             } catch (ResponseException e) {
                 String errorMessage = e.getMessage();
-                int code = e.StatusCode();
+                int code = e.statusCode();
                 res.status(code);
 
                 return gson.toJson(new ErrorResponse(errorMessage));

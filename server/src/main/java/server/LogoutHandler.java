@@ -1,8 +1,8 @@
 package server;
 
-import Service.UserService;
+import service.UserService;
 import com.google.gson.Gson;
-import dataAccess.ResponseException;
+import dataaccess.ResponseException;
 import spark.Request;
 import spark.Response;
 

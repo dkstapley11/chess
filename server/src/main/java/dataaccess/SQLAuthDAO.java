@@ -1,4 +1,4 @@
-package dataAccess;
+package dataaccess;
 
 import model.AuthData;
 
@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class SQLAuthDAO implements AuthDAO {

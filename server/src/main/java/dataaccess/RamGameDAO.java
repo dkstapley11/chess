@@ -1,9 +1,7 @@
-package dataAccess;
+package dataaccess;
 
-import model.AuthData;
 import model.GameData;
 
-import javax.xml.crypto.Data;
 import java.util.HashSet;
 
 public class RamGameDAO implements GameDAO {

@@ -1,13 +1,11 @@
 package server;
 
-import Service.GameService;
+import service.GameService;
 import com.google.gson.Gson;
-import dataAccess.ResponseException;
+import dataaccess.ResponseException;
 import model.GameListResponse;
 import spark.Request;
 import spark.Response;
-
-import java.util.HashSet;
 
 public class ListGamesHandler {
     private GameService gameService;
