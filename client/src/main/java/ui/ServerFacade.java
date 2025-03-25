@@ -48,10 +48,17 @@ public class ServerFacade {
         this.makeRequest("POST", "/game", r, null);
     }
 
+    public GameData createGame(String gameName) throws ResponseException {
+        var name = Map.of("gameName", gameName);
+        var request = new Gson().toJson(name);
+        return this.makeRequest("POST", request, "/game", GameData.class);
+    }
+
     public GameListResponse listGames() throws ResponseException {
         var path = "/game";
         return this.makeRequest("GET", path, null, GameListResponse.class);
     }
+
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
