@@ -18,9 +18,9 @@ public class ServerFacade {
     }
 
 
-    public UserData register(UserData user) throws ResponseException {
+    public AuthData register(UserData user) throws ResponseException {
         var request = new Gson().toJson(user);
-        return this.makeRequest("POST", "/user", request, UserData.class);
+        return this.makeRequest("POST", "/user", request, AuthData.class);
     }
 
     public void login(String username, String password) throws ResponseException {
