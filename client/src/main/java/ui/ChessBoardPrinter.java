@@ -22,7 +22,9 @@ public class ChessBoardPrinter {
     }
 
     public static void printStartBoard(boolean whitePerspective) {
-        printBoard(new ChessBoard(), whitePerspective);
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        printBoard(board, whitePerspective);
     }
 
     private static void printRankLine(ChessBoard chessBoard, int rank, boolean whitePerspective) {

@@ -14,7 +14,6 @@ public class ChessBoard {
 
     public ChessBoard() {
         board = new ChessPiece[8][8];
-        initializeBoard();
     }
 
     public ChessBoard(ChessBoard copy) {
