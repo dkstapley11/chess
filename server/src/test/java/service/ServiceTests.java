@@ -59,7 +59,7 @@ public class ServiceTests {
     public void testRegisterUserFailureInvalidData() {
         UserData invalidUser = new UserData("", "password", "email@mail.com");
 
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             userService.registerUser(invalidUser);
         });
     }
@@ -67,7 +67,7 @@ public class ServiceTests {
     // Test registerUser() - Negative Case (Username Already Taken)
     @Test
     public void testRegisterUserFailureUsernameTaken() {
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             userService.registerUser(existingUser);  // Username already exists
         });
     }
@@ -85,7 +85,7 @@ public class ServiceTests {
     // Test loginUser() - Negative Case (Invalid Credentials)
     @Test
     public void testLoginUserFailureInvalidCredentials() {
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             userService.loginUser("nonExistingUser", "wrongPassword");
         });
     }
@@ -97,7 +97,7 @@ public class ServiceTests {
         userService.logoutUser(existingAuth);
 
         // Verify that the token has been removed (check DAO)
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             authDAO.getAuth(existingAuth);  // This should throw an exception as token is deleted
         });
     }
@@ -107,7 +107,7 @@ public class ServiceTests {
     public void testLogoutUserFailureInvalidToken() {
         String invalidAuthToken = "invalidToken";
 
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             userService.logoutUser(invalidAuthToken);  // This should throw an exception
         });
     }
@@ -138,7 +138,7 @@ public class ServiceTests {
         String invalidAuthToken = "invalidToken";
         String gameName = "Invalid Game";
 
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             gameService.createGame(gameName, invalidAuthToken);
         });
     }
@@ -159,7 +159,7 @@ public class ServiceTests {
     public void testListGamesFailure() {
         String invalidAuthToken = "invalidToken";
 
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             gameService.listGames(invalidAuthToken);
         });
     }
@@ -184,7 +184,7 @@ public class ServiceTests {
         JoinRequest joinRequest = new JoinRequest("WHITE", 1);
 
         // Set up the game so that the white slot is already taken
-        assertThrows(DataAccessException.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             gameService.joinGame(authToken, joinRequest);
         });
     }
