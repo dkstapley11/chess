@@ -107,8 +107,8 @@ public class ChessClient {
             return "You joined game with id: " + id + " as a spectator";
         }
         if (params.length == 2) {
-            String color = params[0].toUpperCase();
-            int id = Integer.parseInt(params[1]);
+            String color = params[1].toUpperCase();
+            int id = Integer.parseInt(params[0]);
             server.joinGame(color, id);
             // Use white perspective if playing white; otherwise, black perspective.
             whitePerspective = !color.equals("BLACK");
