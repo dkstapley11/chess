@@ -18,7 +18,7 @@ public class ChessClient {
         this.serverUrl = serverUrl;
     }
 
-    public String eval(String input) {
+    public String eval(String input) throws ResponseException {
         try {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -27,15 +27,16 @@ public class ChessClient {
                 case "login" -> login(params);
                 case "register" -> register(params);
                 case "list" -> listGames();
-                case "logout" -> logout();
+                case "create" -> createGame(params);
                 case "join" -> joinGame(params);
                 case "observe" -> joinGame(params);
+                case "logout" -> logout();
                 case "help" -> help();
                 case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
-            return ex.getMessage();
+            throw ex;
         }
     }
 
@@ -43,18 +44,21 @@ public class ChessClient {
         if (params.length >= 1) {
             state = State.SIGNEDIN;
             visitorName = String.join("-", params);
+            server.login(params[0], params[1]);
+            state = State.SIGNEDIN;
             return String.format("You signed in as %s.", visitorName);
         }
-        throw new ResponseException(400, "Expected: <yourname>");
+        throw new ResponseException(400, "Expected: <username> <password>");
     }
 
     public String register(String... params) throws ResponseException {
-        if (params.length >= 2) {
+        if (params.length >= 3) {
             String username = params[0];
             String password = params[1];
             String email = params[2];
             UserData user = new UserData(username, password, email);
             server.register(user);
+            state = State.SIGNEDIN;
             return String.format("You registered as %s.", username);
         }
         throw new ResponseException(400, "Unable to register");
@@ -63,29 +67,55 @@ public class ChessClient {
     public String listGames() throws ResponseException {
         assertSignedIn();
         var games = server.listGames().games();
-        var result = new StringBuilder();
-        var gson = new Gson();
+        StringBuilder result = new StringBuilder();
+
+        if (games == null || games.isEmpty()) {
+            return "No games available.";
+        }
+
+        int index = 1;
         for (var game : games) {
-            result.append(gson.toJson(game)).append('\n');
+            result.append(index).append(". ")
+                    .append("Game Name: ").append(game.gameName())
+                    .append(" (ID: ").append(game.gameID()).append(")");
+
+            if (game.game() != null && game.game().getTeamTurn() != null) {
+                result.append(" - Turn: ").append(game.game().getTeamTurn());
+            }
+
+            if (game.blackUsername() != null && game.whiteUsername() != null) {
+                result.append("\n   Players: ");
+                result.append("\nBlack: ").append(game.blackUsername());
+                result.append("\nWhite: ").append(game.whiteUsername());
+            }
+
+            result.append("\n"); // Newline after each game
+            index++;
         }
         return result.toString();
     }
 
     public String joinGame(String... params) throws ResponseException {
         assertSignedIn();
+        boolean whitePerspective = true;
         if (params.length == 1) {
-            var id = Integer.parseInt(params[0]);
+            int id = Integer.parseInt(params[0]);
             server.joinGame(null, id);
-            return ("You joined game with id: " + id + " as a spectator");
+            // Spectators view from white perspective.
+            whitePerspective = true;
+            ChessBoard.drawBoard(whitePerspective);
+            return "You joined game with id: " + id + " as a spectator";
         }
         if (params.length == 2) {
-            var color = params[0];
-            var id = Integer.parseInt(params[1]);
+            String color = params[0].toUpperCase();
+            int id = Integer.parseInt(params[1]);
             server.joinGame(color, id);
-            return ("You joined game with id: " + id + " as the " + color + " player");
-
+            // Use white perspective if playing white; otherwise, black perspective.
+            whitePerspective = !color.equals("BLACK");
+            ChessBoard.drawBoard(whitePerspective);
+            return "You joined game with id: " + id + " as the " + color + " player";
         }
-        throw new ResponseException(400, "Expected: <game id>");
+        throw new ResponseException(400, "Expected: join <game id> [<color>]");
     }
 
     public String createGame(String... params) throws ResponseException {

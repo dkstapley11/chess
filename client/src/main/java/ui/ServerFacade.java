@@ -19,21 +19,19 @@ public class ServerFacade {
 
 
     public AuthData register(UserData user) throws ResponseException {
-        var request = new Gson().toJson(user);
-        return this.makeRequest("POST", "/user", request, AuthData.class);
+        return this.makeRequest("POST", "/user", user, AuthData.class);
     }
 
     public void login(String username, String password) throws ResponseException {
-        var creds = Map.of("username", username, "password", password);
-        var request = new Gson().toJson(creds);
-        AuthData auth = this.makeRequest("POST", request, "/user", AuthData.class);
+        var request = Map.of("username", username, "password", password);
+        AuthData auth = this.makeRequest("POST", "/session", request, AuthData.class);
+        System.out.println("DID the thing?");
         authtoken = auth.authToken();
     }
 
     public void logout() throws ResponseException {
-        var token = Map.of("authtoken", authtoken);
-        var request = new Gson().toJson(token);
-        AuthData auth = this.makeRequest("DELETE", request, "/session", AuthData.class);
+        var request = Map.of("authtoken", authtoken);
+        AuthData auth = this.makeRequest("DELETE","/session", request, AuthData.class);
         authtoken = auth.authToken();
     }
 
@@ -44,19 +42,16 @@ public class ServerFacade {
         } else {
             request = new JoinRequest(null, gameID);
         }
-        var r = new Gson().toJson(request);
-        this.makeRequest("POST", "/game", r, null);
+        this.makeRequest("PUT", "/game", request, null);
     }
 
     public GameData createGame(String gameName) throws ResponseException {
-        var name = Map.of("gameName", gameName);
-        var request = new Gson().toJson(name);
-        return this.makeRequest("POST", request, "/game", GameData.class);
+        var request = Map.of("gameName", gameName);
+        return this.makeRequest("POST", "/game", request, GameData.class);
     }
 
     public GameListResponse listGames() throws ResponseException {
-        var path = "/game";
-        return this.makeRequest("GET", path, null, GameListResponse.class);
+        return this.makeRequest("GET", "/game", null, GameListResponse.class);
     }
 
 
@@ -66,6 +61,8 @@ public class ServerFacade {
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            http.setRequestProperty("authorization", authtoken);
 
             writeBody(request, http);
             http.connect();
@@ -103,16 +100,11 @@ public class ServerFacade {
 
     }
     private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
-        T response = null;
-        if (http.getContentLength() < 0) {
-            try (InputStream respBody = http.getInputStream()) {
-                InputStreamReader reader = new InputStreamReader(respBody);
-                if (responseClass != null) {
-                    response = new Gson().fromJson(reader, responseClass);
-                }
-            }
+        if (responseClass == null) return null;
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader reader = new InputStreamReader(respBody);
+            return new Gson().fromJson(reader, responseClass);
         }
-        return response;
     }
 
 
