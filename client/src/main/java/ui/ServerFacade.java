@@ -25,7 +25,6 @@ public class ServerFacade {
     public void login(String username, String password) throws ResponseException {
         var request = Map.of("username", username, "password", password);
         AuthData auth = this.makeRequest("POST", "/session", request, AuthData.class);
-        System.out.println("DID the thing?");
         authtoken = auth.authToken();
     }
 

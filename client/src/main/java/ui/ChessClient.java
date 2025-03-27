@@ -1,9 +1,8 @@
 package ui;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-
-import com.google.gson.Gson;
-import model.AuthData;
+import chess.ChessBoard;
 import model.UserData;
 import Exception.ResponseException;
 
@@ -12,6 +11,8 @@ public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
+    // Holds the game IDs in the order they were listed.
+    private ArrayList<Integer> lastGameIds = new ArrayList<>();
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -29,7 +30,7 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
-                case "observe" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "logout" -> logout();
                 case "help" -> help();
                 case "quit" -> "quit";
@@ -41,9 +42,8 @@ public class ChessClient {
     }
 
     public String login(String... params) throws ResponseException {
-        if (params.length >= 1) {
-            state = State.SIGNEDIN;
-            visitorName = String.join("-", params);
+        if (params.length >= 2) {
+            visitorName = params[0];
             server.login(params[0], params[1]);
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", visitorName);
@@ -68,6 +68,8 @@ public class ChessClient {
         assertSignedIn();
         var games = server.listGames().games();
         StringBuilder result = new StringBuilder();
+        // Clear previous mapping.
+        lastGameIds.clear();
 
         if (games == null || games.isEmpty()) {
             return "No games available.";
@@ -75,6 +77,8 @@ public class ChessClient {
 
         int index = 1;
         for (var game : games) {
+            // Save the actual game ID.
+            lastGameIds.add(game.gameID());
             result.append(index).append(". ")
                     .append("Game Name: ").append(game.gameName())
                     .append(" (ID: ").append(game.gameID()).append(")");
@@ -83,13 +87,10 @@ public class ChessClient {
                 result.append(" - Turn: ").append(game.game().getTeamTurn());
             }
 
-            if (game.blackUsername() != null && game.whiteUsername() != null) {
-                result.append("\n   Players: ");
-                result.append("\nBlack: ").append(game.blackUsername());
-                result.append("\nWhite: ").append(game.whiteUsername());
-            }
-
-            result.append("\n"); // Newline after each game
+            result.append("\n   Players: ");
+            result.append("\nWhite: ").append(game.whiteUsername() != null ? game.whiteUsername() : "None");
+            result.append("\nBlack: ").append(game.blackUsername() != null ? game.blackUsername() : "None");
+            result.append("\n");
             index++;
         }
         return result.toString();
@@ -97,25 +98,66 @@ public class ChessClient {
 
     public String joinGame(String... params) throws ResponseException {
         assertSignedIn();
-        boolean whitePerspective = true;
-        if (params.length == 1) {
-            int id = Integer.parseInt(params[0]);
-            server.joinGame(null, id);
-            // Spectators view from white perspective.
+        if (lastGameIds.isEmpty()) {
+            return "No game list available. Please run the list command first.";
+        }
+        if (params.length != 2) {
+            throw new ResponseException(400, "Expected: join <game number> <WHITE|BLACK>");
+        }
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Invalid game number format.");
+        }
+        if (gameNumber < 1 || gameNumber > lastGameIds.size()) {
+            throw new ResponseException(400, "Game number out of range. Please list games and try again.");
+        }
+        int id = lastGameIds.get(gameNumber - 1);
+        // For joinGame, we use a default color, e.g., WHITE.
+        server.joinGame(params[1], id);
+        boolean whitePerspective;
+        String color = params[1];
+        if (color.equals("white")) {
             whitePerspective = true;
-            ChessBoard.drawBoard(whitePerspective);
-            return "You joined game with id: " + id + " as a spectator";
         }
-        if (params.length == 2) {
-            String color = params[1].toUpperCase();
-            int id = Integer.parseInt(params[0]);
-            server.joinGame(color, id);
-            // Use white perspective if playing white; otherwise, black perspective.
-            whitePerspective = !color.equals("BLACK");
-            ChessBoard.drawBoard(whitePerspective);
-            return "You joined game with id: " + id + " as the " + color + " player";
+        else if (color.equals("black")) {
+            whitePerspective = false;
         }
-        throw new ResponseException(400, "Expected: join <game id> [<color>]");
+        else {
+            return "Not a valid color";
+        }
+        ChessBoardPrinter.printStartBoard(whitePerspective);
+        return "You joined game number " + gameNumber + " (ID: " + id + ") as the" + color + "player";
+    }
+
+    /**
+     * Observes a game (joins as a spectator).
+     * Expects a single parameter: the game number.
+     */
+    public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (lastGameIds.isEmpty()) {
+            return "No game list available. Please run the list command first.";
+        }
+        if (params.length != 1) {
+            throw new ResponseException(400, "Expected: observe <game number>");
+        }
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Invalid game number format.");
+        }
+        if (gameNumber < 1 || gameNumber > lastGameIds.size()) {
+            throw new ResponseException(400, "Game number out of range. Please list games and try again.");
+        }
+        int id = lastGameIds.get(gameNumber - 1);
+        // Join game as spectator (pass null for color).
+//        server.joinGame(null, id);
+        // Spectators view from white perspective.
+        ChessBoardPrinter.printStartBoard(true);
+        return "You are now observing game number " + gameNumber + " (ID: " + id + ")";
     }
 
     public String createGame(String... params) throws ResponseException {
@@ -123,7 +165,7 @@ public class ChessClient {
         if (params.length == 1) {
             var gameName = params[0];
             server.createGame(gameName);
-            return ("You created game with name: " + gameName);
+            return "You created game with name: " + gameName;
         }
         throw new ResponseException(400, "Expected: <game name>");
     }
@@ -146,8 +188,8 @@ public class ChessClient {
         return """
                 - create <NAME> - a game
                 - list - games
-                - join <ID> <WHITE|BLACK> - a game
-                - observe <ID> - a game
+                - join <game number> - join a game as a player (default: WHITE)
+                - observe <game number> - observe a game as a spectator
                 - logout - when you are done
                 - help - with possible commands
                 - quit - playing chess
