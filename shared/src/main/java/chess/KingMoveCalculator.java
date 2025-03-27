@@ -43,10 +43,18 @@ public class KingMoveCalculator implements ChessPieceMoveCalculator {
     }
 
     public boolean outOfBounds(int row, int col) {
-        if (row > 8) return true;
-        if (col > 8) return true;
-        if (row < 1) return true;
-        if (col < 1) return true;
+        if (row > 8) {
+            return true;
+        }
+        if (col > 8) {
+            return true;
+        }
+        if (row < 1) {
+            return true;
+        }
+        if (col < 1) {
+            return true;
+        }
         return false;
     }
 

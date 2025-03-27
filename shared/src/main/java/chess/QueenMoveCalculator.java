@@ -21,7 +21,14 @@ public class QueenMoveCalculator implements ChessPieceMoveCalculator {
         return moves;
     }
 
-    private void addMovesInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition position, ChessGame.TeamColor color, int rowDirection, int colDirection)
+    private void addMovesInDirection(
+             Collection<ChessMove> moves,
+             ChessBoard board,
+             ChessPosition position,
+             ChessGame.TeamColor color,
+             int rowDirection,
+             int colDirection
+    )
         {
             int startRow = position.getRow();
             int startCol = position.getColumn();

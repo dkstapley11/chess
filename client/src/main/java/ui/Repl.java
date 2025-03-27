@@ -1,11 +1,8 @@
 package ui;
 
-import model.UserData;
-
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
-import Exception.ResponseException;
 
 public class Repl {
     private final ChessClient client;
@@ -28,7 +25,7 @@ public class Repl {
                 result = client.eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
-                var msg = e.toString();
+                var msg = e.getMessage();
                 System.out.print(msg);
             }
         }

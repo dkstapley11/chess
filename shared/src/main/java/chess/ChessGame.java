@@ -305,12 +305,23 @@ public class ChessGame {
             ChessPosition diagRight = new ChessPosition(kingRow + 1, kingCol + 1);
             ChessPosition diagLeft = new ChessPosition(kingRow + 1, kingCol - 1);
             if (isInBounds(diagLeft)) {
-                if (!isSquareEmpty(board, diagLeft) && board.getPiece(diagLeft).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagLeft).getTeamColor() != color) {
+                if (
+                        !isSquareEmpty(board, diagLeft) &&
+                        board.getPiece(diagLeft).getPieceType() == ChessPiece.PieceType.PAWN &&
+                        board.getPiece(diagLeft).getTeamColor() != color
+                )
+                {
                     return true;
                 }
             }
             if (isInBounds(diagRight)) {
-                if (!isSquareEmpty(board, diagRight) && board.getPiece(diagRight).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagRight).getTeamColor() != color) {
+                if (
+                        !isSquareEmpty(board, diagRight) &&
+                        board.getPiece(diagRight).getPieceType() ==
+                        ChessPiece.PieceType.PAWN &&
+                        board.getPiece(diagRight).getTeamColor() !=
+                        color)
+                {
                     return true;
                 }
             }
@@ -318,12 +329,24 @@ public class ChessGame {
             ChessPosition diagRight = new ChessPosition(kingRow - 1, kingCol + 1);
             ChessPosition diagLeft = new ChessPosition(kingRow - 1, kingCol - 1);
             if (isInBounds(diagLeft)) {
-                if (!isSquareEmpty(board, diagLeft) && board.getPiece(diagLeft).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagLeft).getTeamColor() != color) {
+                if (
+                        !isSquareEmpty(board, diagLeft) &&
+                        board.getPiece(diagLeft).getPieceType() ==
+                        ChessPiece.PieceType.PAWN &&
+                        board.getPiece(diagLeft).getTeamColor() !=
+                        color)
+                {
                     return true;
                 }
             }
             if (isInBounds(diagRight)) {
-                if (!isSquareEmpty(board, diagRight) && board.getPiece(diagRight).getPieceType() == ChessPiece.PieceType.PAWN && board.getPiece(diagRight).getTeamColor() != color) {
+                if (
+                        !isSquareEmpty(board, diagRight) &&
+                        board.getPiece(diagRight).getPieceType() ==
+                        ChessPiece.PieceType.PAWN &&
+                        board.getPiece(diagRight).getTeamColor() !=
+                        color)
+                {
                     return true;
                 }
             }

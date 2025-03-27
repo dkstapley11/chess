@@ -17,7 +17,13 @@ public class BishopMoveCalculator implements ChessPieceMoveCalculator {
         return moves;
     }
 
-    public void addMovesInDirection(Collection<ChessMove> moves, ChessBoard board, ChessGame.TeamColor color, ChessPosition position, int rowOffset, int colOffset) {
+    public void addMovesInDirection(
+            Collection<ChessMove> moves,
+            ChessBoard board,
+            ChessGame.TeamColor color,
+            ChessPosition position,
+            int rowOffset, int colOffset
+    ) {
         int row = position.getRow();
         int col = position.getColumn();
         while (true) {
@@ -39,10 +45,18 @@ public class BishopMoveCalculator implements ChessPieceMoveCalculator {
     }
 
     public boolean outOfBounds(int row, int col) {
-        if (row > 8) return true;
-        if (col > 8) return true;
-        if (row < 1) return true;
-        if (col < 1) return true;
+        if (row > 8) {
+            return true;
+        }
+        if (col > 8) {
+            return true;
+        }
+        if (row < 1) {
+            return true;
+        }
+        if (col < 1) {
+            return true;
+        }
         return false;
     }
 

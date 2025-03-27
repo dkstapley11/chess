@@ -2,7 +2,7 @@ package ui;
 
 import com.google.gson.Gson;
 import model.*;
-import Exception.ResponseException;
+import exception.ResponseException;
 
 import java.io.*;
 import java.net.*;
@@ -19,7 +19,9 @@ public class ServerFacade {
 
 
     public AuthData register(UserData user) throws ResponseException {
-        return this.makeRequest("POST", "/user", user, AuthData.class);
+        AuthData auth = this.makeRequest("POST", "/user", user, AuthData.class);
+        authtoken = auth.authToken();
+        return auth;
     }
 
     public void login(String username, String password) throws ResponseException {
@@ -99,7 +101,9 @@ public class ServerFacade {
     }
 
     private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
-        if (responseClass == null) return null;
+        if (responseClass == null) {
+            return null;
+        }
         try (InputStream respBody = http.getInputStream()) {
             InputStreamReader reader = new InputStreamReader(respBody);
             return new Gson().fromJson(reader, responseClass);

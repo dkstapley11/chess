@@ -5,7 +5,7 @@ import server.Server;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ui.ServerFacade;
-import Exception.ResponseException;
+import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
 import model.GameData;

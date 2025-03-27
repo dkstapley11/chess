@@ -2,9 +2,9 @@ package ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import chess.ChessBoard;
+
 import model.UserData;
-import Exception.ResponseException;
+import exception.ResponseException;
 
 public class ChessClient {
     private String visitorName = null;
@@ -80,8 +80,7 @@ public class ChessClient {
             // Save the actual game ID.
             lastGameIds.add(game.gameID());
             result.append(index).append(". ")
-                    .append("Game Name: ").append(game.gameName())
-                    .append(" (ID: ").append(game.gameID()).append(")");
+                    .append("Game Name: ").append(game.gameName());
 
             if (game.game() != null && game.game().getTeamTurn() != null) {
                 result.append(" - Turn: ").append(game.game().getTeamTurn());
@@ -128,7 +127,7 @@ public class ChessClient {
             return "Not a valid color";
         }
         ChessBoardPrinter.printStartBoard(whitePerspective);
-        return "You joined game number " + gameNumber + " (ID: " + id + ") as the" + color + "player";
+        return "You joined game number " + gameNumber +  "as the" + color + "player";
     }
 
     /**
@@ -157,7 +156,7 @@ public class ChessClient {
 //        server.joinGame(null, id);
         // Spectators view from white perspective.
         ChessBoardPrinter.printStartBoard(true);
-        return "You are now observing game number " + gameNumber + " (ID: " + id + ")";
+        return "You are now observing game number " + gameNumber;
     }
 
     public String createGame(String... params) throws ResponseException {

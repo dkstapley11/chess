@@ -25,7 +25,11 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
         ChessPosition diagLeft = new ChessPosition(row + direction, col -1);
         ChessPosition diagRight = new ChessPosition(row + direction, col + 1);
         // check if it's the first move, if so, no worry about out of bounds
-        if (isFirstMove(board, position) && squareEmpty(board, new ChessPosition(row + direction, col)) && squareEmpty(board, new ChessPosition(row + direction + direction, col))) {
+        if (
+                isFirstMove(board, position) &&
+                squareEmpty(board, new ChessPosition(row + direction, col)) &&
+                squareEmpty(board, new ChessPosition(row + direction + direction, col)))
+        {
             moves.add(new ChessMove(position, new ChessPosition(row + direction + direction, col), null));
         }
         // check move one space forward, non promotion move
@@ -38,18 +42,44 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
         }
         // diagonal captures
         // if not out of bounds, not empty, is an enemy piece, and not a promotion...
-        if (!outOfBounds(diagRight.getRow(), diagRight.getColumn()) && !squareEmpty(board, diagRight) && board.getPiece(diagRight).getTeamColor() != color && row + direction != 8 && row + direction != 1) {
+        if (
+                !outOfBounds(diagRight.getRow(), diagRight.getColumn()) &&
+                !squareEmpty(board, diagRight) &&
+                board.getPiece(diagRight).getTeamColor() !=
+                color &&
+                row + direction != 8 &&
+                row + direction != 1)
+        {
             moves.add(new ChessMove(position, diagRight, null));
         }
         // same for diagLeft
-        if (!outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) && !squareEmpty(board, diagLeft) && board.getPiece(diagLeft).getTeamColor() != color && row + direction != 8 && row + direction != 1) {
+        if (
+                !outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) &&
+                !squareEmpty(board, diagLeft) &&
+                board.getPiece(diagLeft).getTeamColor() !=
+                color &&
+                row + direction != 8 && row + direction !=
+                1)
+        {
             moves.add(new ChessMove(position, diagLeft, null));
         }
         // now diagonal promotion moves. if not out of bounds, not empty, enemy piece, and on 8th or 1st rank...
-        if (!outOfBounds(diagRight.getRow(), diagRight.getColumn()) && !squareEmpty(board, diagRight) && board.getPiece(diagRight).getTeamColor() != color && (row + direction == 8 || row + direction == 1)) {
+        if (
+                !outOfBounds(diagRight.getRow(), diagRight.getColumn()) &&
+                !squareEmpty(board, diagRight) &&
+                board.getPiece(diagRight).getTeamColor() != color
+                && (row + direction == 8 ||
+                row + direction == 1))
+        {
             addPromotions(moves, position, diagRight);
         }
-        if (!outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) && !squareEmpty(board, diagLeft) && board.getPiece(diagLeft).getTeamColor() != color && (row + direction == 8 || row + direction == 1)) {
+        if (
+                !outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) &&
+                !squareEmpty(board, diagLeft) &&
+                board.getPiece(diagLeft).getTeamColor() != color &&
+                (row + direction == 8
+                || row + direction == 1))
+        {
             addPromotions(moves, position, diagLeft);
         }
     }
@@ -74,10 +104,18 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
     }
 
     public boolean outOfBounds(int row, int col) {
-        if (row > 8) return true;
-        if (col > 8) return true;
-        if (row < 1) return true;
-        if (col < 1) return true;
+        if (row > 8) {
+            return true;
+        }
+        if (col > 8) {
+            return true;
+        }
+        if (row < 1) {
+            return true;
+        }
+        if (col < 1) {
+            return true;
+        }
         return false;
     }
 

@@ -38,8 +38,12 @@ public class KnightMoveCalculator implements ChessPieceMoveCalculator {
     }
 
     private boolean isValidMove(ChessBoard board, ChessPosition target, ChessGame.TeamColor color) {
-        if (!isInBounds(target)) return false;
-        if (isSquareEmpty(board, target)) return true;
+        if (!isInBounds(target)) {
+            return false;
+        }
+        if (isSquareEmpty(board, target)) {
+            return true;
+        }
         ChessGame.TeamColor targetColor = board.getPiece(target).getTeamColor();
         return targetColor != color;
     }
