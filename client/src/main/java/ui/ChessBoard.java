@@ -6,7 +6,7 @@ public class ChessBoard {
     private static final int SIZE = 8;
 
     public static void drawBoard(boolean whitePerspective) {
-        // Create a board array to hold the piece strings.
+        // Create a board array for the pieces.
         String[][] board = new String[SIZE][SIZE];
 
         // Initialize all squares as EMPTY.
@@ -42,7 +42,7 @@ public class ChessBoard {
             board[1][j] = BLACK_PAWN;
         }
 
-        // Determine row iteration based on perspective.
+        // Determine row iteration order based on perspective.
         int startRow, endRow, step;
         if (whitePerspective) {
             startRow = 0; endRow = SIZE; step = 1;
@@ -50,27 +50,60 @@ public class ChessBoard {
             startRow = SIZE - 1; endRow = -1; step = -1;
         }
 
-        // Draw the board with rank numbers and file letters.
-        // Note: board row 0 corresponds to rank 8 (white perspective) and vice versa.
+        // Print top file labels.
+        System.out.println(getFileLabels(whitePerspective));
+
+        // Print each rank.
         for (int i = startRow; i != endRow; i += step) {
             // Compute rank number for display.
             int rank = whitePerspective ? 8 - i : i + 1;
-            System.out.print(rank + " "); // left border with rank
-
-            // For columns, reverse order for black perspective.
+            // Print left rank border.
+            System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + " " + rank + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
+            // Print each square.
             for (int j = 0; j < SIZE; j++) {
+                // Reverse column order for black perspective.
                 int col = whitePerspective ? j : (SIZE - 1 - j);
-                System.out.print(board[i][col]);
+                String squareBg = getSquareBgColor(rank, col + 1);
+                String piece = board[i][col];
+                // Each square is printed with its background and centered piece.
+                System.out.print(squareBg + " " + piece + " " + RESET_BG_COLOR);
             }
-            System.out.println(" " + rank); // right border with rank
+            // Print right rank border.
+            System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + " " + rank + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
         }
 
-        // Print file letters at the bottom.
+        // Print bottom file labels.
+        System.out.println(getFileLabels(whitePerspective));
+    }
+
+    /**
+     * Returns a string with the file labels (a-h) in a formatted row.
+     */
+    private static String getFileLabels(boolean whitePerspective) {
+        StringBuilder labels = new StringBuilder();
+        labels.append("   ");
         if (whitePerspective) {
-            System.out.println("   a  b  c  d  e  f  g  h");
+            for (char file = 'a'; file <= 'h'; file++) {
+                labels.append("  ").append(file).append(" ");
+            }
         } else {
-            System.out.println("   h  g  f  e  d  c  b  a");
+            for (char file = 'h'; file >= 'a'; file--) {
+                labels.append("  ").append(file).append(" ");
+            }
+        }
+        return labels.toString();
+    }
+
+    /**
+     * Returns a background color for a square based on its rank and file (1-indexed).
+     * This example alternates between two colors for a checkerboard pattern.
+     */
+    private static String getSquareBgColor(int rank, int file) {
+        // Alternate colors based on the sum of rank and file.
+        if ((rank + file) % 2 == 0) {
+            return SET_BG_COLOR_RED;
+        } else {
+            return SET_BG_COLOR_LIGHT_GREY;
         }
     }
 }
-
