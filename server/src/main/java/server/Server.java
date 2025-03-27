@@ -67,6 +67,11 @@ public class Server {
         return "{}";
     }
 
+    public void clearDB() throws ResponseException{
+        userService.clearUsers();
+        gameService.clearGames();
+    }
+
     public void stop() {
         Spark.stop();
         Spark.awaitStop();

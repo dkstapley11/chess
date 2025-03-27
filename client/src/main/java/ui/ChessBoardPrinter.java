@@ -1,4 +1,5 @@
 package ui;
+
 import chess.*;
 import static ui.EscapeSequences.*;
 
@@ -25,26 +26,30 @@ public class ChessBoardPrinter {
     }
 
     private static void printRankLine(ChessBoard chessBoard, int rank, boolean whitePerspective) {
-        System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + " " + rank + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
+        // Print left rank border with fixed width (e.g., 4 or 5 characters wide)
+        System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + String.format(" %2d ", rank) + RESET_BG_COLOR + RESET_TEXT_COLOR);
 
         if (whitePerspective) {
             for (int file = 1; file <= 8; file++) {
                 String squareBg = getSquareBgColor(rank, file);
                 ChessPiece piece = chessBoard.getPiece(new ChessPosition(rank, file));
                 String pieceStr = getPieceIcon(piece);
-                // Each square is printed with background and centered piece.
-                System.out.print(squareBg + " " + pieceStr + " " + RESET_BG_COLOR);
+                // Force each square to be 5 characters wide (space, 3-character cell, space)
+                String cell = String.format(" %3s ", pieceStr);
+                System.out.print(squareBg + cell + RESET_BG_COLOR);
             }
         } else {
             for (int file = 8; file >= 1; file--) {
                 String squareBg = getSquareBgColor(rank, file);
                 ChessPiece piece = chessBoard.getPiece(new ChessPosition(rank, file));
                 String pieceStr = getPieceIcon(piece);
-                System.out.print(squareBg + " " + pieceStr + " " + RESET_BG_COLOR);
+                String cell = String.format(" %3s ", pieceStr);
+                System.out.print(squareBg + cell + RESET_BG_COLOR);
             }
         }
 
-        System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + " " + rank + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
+        // Print right rank border.
+        System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + String.format(" %2d ", rank) + RESET_BG_COLOR + RESET_TEXT_COLOR);
     }
 
     /**
@@ -55,14 +60,14 @@ public class ChessBoardPrinter {
      */
     private static String getFileLabels(boolean whitePerspective) {
         StringBuilder labels = new StringBuilder();
-        labels.append("   ");
+        labels.append("    "); // Adjust spacing to align with board cells.
         if (whitePerspective) {
             for (char file = 'a'; file <= 'h'; file++) {
-                labels.append("  ").append(file).append(" ");
+                labels.append(String.format(" %3c ", file));
             }
         } else {
             for (char file = 'h'; file >= 'a'; file--) {
-                labels.append("  ").append(file).append(" ");
+                labels.append(String.format(" %3c ", file));
             }
         }
         return labels.toString();
@@ -75,7 +80,7 @@ public class ChessBoardPrinter {
 
     private static String getPieceIcon(ChessPiece piece) {
         if (piece == null) {
-            return "  "; // Two spaces for an empty square.
+            return " "; // A single space; formatting in printRankLine ensures fixed width.
         }
         return switch (piece.getPieceType()) {
             case KING -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KING : BLACK_KING;
@@ -84,7 +89,7 @@ public class ChessBoardPrinter {
             case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KNIGHT : BLACK_KNIGHT;
             case ROOK -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_ROOK : BLACK_ROOK;
             case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN : BLACK_PAWN;
-            default -> "  ";
+            default -> " ";
         };
     }
 }

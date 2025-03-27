@@ -19,10 +19,12 @@ public class ResponseException extends Exception {
         return new Gson().toJson(Map.of("message", getMessage(), "status", statusCode));
     }
 
-    public static ResponseException fromJson(InputStream stream) {
-        var map = new Gson().fromJson(new InputStreamReader(stream), HashMap.class);
-        var status = ((Double)map.get("status")).intValue();
-        String message = map.get("message").toString();
+    public static ResponseException fromJson(String json, int status) {
+        Map errorMap = new Gson().fromJson(json, Map.class);
+        String message = (String) errorMap.get("message");
+        if (message == null || message.isEmpty()) {
+            message = "Unknown error";
+        }
         return new ResponseException(status, message);
     }
 
