@@ -2,6 +2,7 @@ package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
@@ -31,7 +32,7 @@ public class WebsocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) {
+    public void onMessage(Session session, String message) throws Exception {
         System.out.println("Received message: " + message);
 
         try {
@@ -74,17 +75,39 @@ public class WebsocketHandler {
     // - Validates the user (authToken, gameID, etc.)
     // - Sends a LOAD_GAME message to the connecting (root) client
     // - Broadcasts a NOTIFICATION to other connected clients in the game
-    private void handleConnectCommand(Session session, UserGameCommand command) {
-        // TODO: Validate authToken and gameID, retrieve the current game state
-        // For now, create a dummy LOAD_GAME response:
-        ServerMessage loadGameMessage = new ServerMessage();
-        loadGameMessage.setServerMessageType(ServerMessage.ServerMessageType.LOAD_GAME);
-        loadGameMessage.setGame("Current game state placeholder"); // Replace with your game object
+    private void handleConnectCommand(Session session, UserGameCommand command) throws Exception {
+        try {
+            AuthData auth = Server.userService.getAuth(command.getAuthToken());
+            GameData game = Server.gameService.getGameData(command.getAuthToken(), command.getGameID());
 
-        sendMessage(session, gson.toJson(loadGameMessage));
+            ChessGame.TeamColor joiningColor = command.getTeamColor().toString().equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
 
-        // TODO: Broadcast a notification to other sessions about the new connection
-        // e.g., "Alice connected as white" or "Bob connected as observer"
+            boolean correctColor;
+            if (joiningColor == ChessGame.TeamColor.WHITE) {
+                correctColor = Objects.equals(game.whiteUsername(), auth.username());
+            }
+            else {
+                correctColor = Objects.equals(game.blackUsername(), auth.username());
+            }
+
+            if (!correctColor) {
+                Error error = new Error("Error: attempting to join with wrong color");
+                sendError(session, error);
+                return;
+            }
+
+            Notification notif = new Notification("%s has joined the game as %s".formatted(auth.username(), command.getColor().toString()));
+            broadcastMessage(session, notif);
+
+            LoadGame load = new LoadGame(game.game());
+            sendMessage(session, load);
+        }
+        catch (UnauthorizedException e) {
+            sendError(session, new Error("Error: Not authorized"));
+        } catch (BadRequestException e) {
+            sendError(session, new Error("Error: Not a valid game"));
+        }
+
     }
 
     // Handles the MAKE_MOVE command:
@@ -94,12 +117,11 @@ public class WebsocketHandler {
     private void handleMakeMoveCommand(Session session, UserGameCommand command) {
         // TODO: Process the move using your chess logic (e.g., gameService.makeMove(...))
         // For demonstration, create a dummy updated game state:
-        ServerMessage loadGameMessage = new ServerMessage();
-        loadGameMessage.setServerMessageType(ServerMessage.ServerMessageType.LOAD_GAME);
+        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         loadGameMessage.setGame("Updated game state after move"); // Replace with actual updated game
 
         // Send updated game state to the current session
-        sendMessage(session, gson.toJson(loadGameMessage));
+        sendMessage(session, loadGameMessage);
 
         // TODO: Broadcast a NOTIFICATION message to all other sessions:
         // e.g., "Alice made move: E2-E4"

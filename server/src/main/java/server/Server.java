@@ -18,8 +18,8 @@ public class Server {
     private final LogoutHandler logoutHandler;
     private final WebsocketHandler webSocketHandler;
 
-    UserService userService;
-    GameService gameService;
+    static UserService userService;
+    static GameService gameService;
 
     static ConcurrentHashMap<Session, Integer> gameSessions = new ConcurrentHashMap<>();
 

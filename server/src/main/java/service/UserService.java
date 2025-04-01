@@ -49,6 +49,10 @@ public class UserService {
         aDAO.deleteAuth(authToken);
     }
 
+    public AuthData getAuth(String authToken) throws ResponseException {
+        return aDAO.getAuth(authToken);
+    }
+
     public void clearUsers() throws ResponseException {
         uDAO.clear();
         aDAO.clear();

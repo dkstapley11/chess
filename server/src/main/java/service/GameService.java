@@ -116,6 +116,11 @@ public class GameService {
         return true;
     }
 
+    public GameData getGameData(String authToken, int gameID) throws Exception {
+        aDAO.getAuth(authToken);
+        return gDAO.getGame(gameID);
+    }
+
     public void clearGames() throws ResponseException {
         gDAO.clear();
     }
