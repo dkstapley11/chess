@@ -20,6 +20,7 @@ public class WebsocketFacade extends Endpoint {
     private Session session;
     private final NotificationHandler notificationHandler;
     private final Gson gson = new Gson();
+    String authtoken;
 
     // The facade constructor establishes the WebSocket connection.
     public WebsocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
@@ -54,9 +55,9 @@ public class WebsocketFacade extends Endpoint {
     // === Public API Methods ===
 
     // Joins a game as a player. The caller must supply the auth token, game ID, and desired color.
-    public void joinAsPlayer(String authToken, int gameID, String color) throws ResponseException {
+    public void joinAsPlayer(int gameID, String color) throws ResponseException {
         try {
-            JoinPlayer command = new JoinPlayer(authToken, gameID, color);
+            JoinPlayer command = new JoinPlayer(authtoken, gameID, color);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {
@@ -65,9 +66,9 @@ public class WebsocketFacade extends Endpoint {
     }
 
     // Joins a game as an observer.
-    public void joinAsObserver(String authToken, int gameID) throws ResponseException {
+    public void joinAsObserver(int gameID) throws ResponseException {
         try {
-            JoinObserver command = new JoinObserver(authToken, gameID);
+            JoinObserver command = new JoinObserver(authtoken, gameID);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {
@@ -76,9 +77,9 @@ public class WebsocketFacade extends Endpoint {
     }
 
     // Sends a move command. The ChessMove object should represent your move data.
-    public void makeMove(String authToken, int gameID, ChessMove move) throws ResponseException {
+    public void makeMove(int gameID, ChessMove move) throws ResponseException {
         try {
-            MakeMove command = new MakeMove(authToken, gameID, move);
+            MakeMove command = new MakeMove(authtoken, gameID, move);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {
@@ -87,9 +88,9 @@ public class WebsocketFacade extends Endpoint {
     }
 
     // Leaves a game.
-    public void leaveGame(String authToken, int gameID) throws ResponseException {
+    public void leaveGame(int gameID) throws ResponseException {
         try {
-            Leave command = new Leave(authToken, gameID);
+            Leave command = new Leave(authtoken, gameID);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
             this.session.close();
@@ -99,9 +100,9 @@ public class WebsocketFacade extends Endpoint {
     }
 
     // Resigns from a game.
-    public void resignGame(String authToken, int gameID) throws ResponseException {
+    public void resignGame(int gameID) throws ResponseException {
         try {
-            Resign command = new Resign(authToken, gameID);
+            Resign command = new Resign(authtoken, gameID);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {
