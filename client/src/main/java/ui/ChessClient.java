@@ -22,6 +22,8 @@ public class ChessClient {
     private ArrayList<Integer> lastGameIds = new ArrayList<>();
     private WebsocketFacade ws;
     private final NotificationHandler notificationHandler;
+    boolean whitePerspective = true;
+    int currentGame;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
@@ -40,7 +42,7 @@ public class ChessClient {
                         return gameplayHelp();
                     case "redraw":
                         // Redraw the board (this example simply reprints the starting board).
-                        ChessBoardPrinter.printStartBoard(isWhitePerspective());
+                        ChessBoardPrinter.printStartBoard(whitePerspective);
                         return "Board redrawn.";
                     case "move":
                         if (params.length >= 3 && params[1].matches("[a-h][1-8]") && params[2].matches("[a-h][1-8]")) {
@@ -52,18 +54,17 @@ public class ChessClient {
                                 promotion = getPieceType(params[3]);
                                 if (promotion == null) {
                                     System.out.println("Please provide proper promotion piece name (ex: 'knight')");
-                                    printMakeMove();
                                 }
                             }
 
-                            server.makeMove(gameID, new ChessMove(from, to, promotion));
+                            ws.makeMove(currentGame, new ChessMove(from, to, promotion));
                         }
                         else {
-                            out.println("Please provide a to and from coordinate (ex: 'c3 d5')");
+                            System.out.println("Please provide a to and from coordinate (ex: 'c3 d5')");
                             printMakeMove();
                         }
                     case "resign":
-                        ws.resignGame(getAuthToken(), getGameID());
+                        ws.resignGame(currentGame);
                         return "You resigned from the game.";
                     case "highlight":
                         // Usage: highlight <row> <col>
@@ -80,7 +81,7 @@ public class ChessClient {
                             throw new ResponseException(400, "Invalid coordinates.");
                         }
                     case "leave":
-                        ws.leaveGame(getAuthToken(), getGameID());
+                        ws.leaveGame(currentGame);
                         state = State.SIGNEDIN; // Transition back to post-login mode.
                         ws = null;
                         return "You left the game.";
@@ -188,9 +189,10 @@ public class ChessClient {
             throw new ResponseException(400, "Game number out of range. Please list games and try again.");
         }
         int id = lastGameIds.get(gameNumber - 1);
+        currentGame = id;
         // For joinGame, we use a default color, e.g., WHITE.
+        ws = new WebsocketFacade(serverUrl, notificationHandler);
         ws.joinAsPlayer(id, params[1]);
-        boolean whitePerspective;
         String color = params[1];
         if (color.equals("white")) {
             whitePerspective = true;
@@ -228,21 +230,12 @@ public class ChessClient {
             throw new ResponseException(400, "Game number out of range. Please list games and try again.");
         }
         int id = lastGameIds.get(gameNumber - 1);
+        currentGame = id;
         // Join game as spectator (pass null for color).
         server.joinGame(null, id);
         ChessBoardPrinter.printStartBoard(true);  // Observers view from white's perspective.
         state = State.PLAYING;
-        try {
-            ws = new ui.websocket.WebsocketFacade(serverUrl, new ui.websocket.NotificationHandler() {
-                @Override
-                public void notify(Notification notification) {
-                    System.out.println("\n[Notification] " + notification.getMessage());
-                    System.out.print(">>> ");
-                }
-            });
-        } catch (Exception ex) {
-            throw new ResponseException(500, "Failed to establish WebSocket connection: " + ex.getMessage());
-        }
+        ws.joinAsObserver(id);
         return "You are now observing game number " + gameNumber + ". Enter gameplay commands (help for commands).";
     }
 
