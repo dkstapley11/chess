@@ -8,7 +8,8 @@ import websocket.commands.JoinPlayer;
 import websocket.commands.Leave;
 import websocket.commands.MakeMove;
 import websocket.commands.Resign;
-import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
+
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
@@ -18,12 +19,12 @@ import java.net.URISyntaxException;
 public class WebsocketFacade extends Endpoint {
 
     private Session session;
-    private final NotificationHandler notificationHandler;
+    private final ServerMessageHandler notificationHandler;
     private final Gson gson = new Gson();
     String authtoken;
 
     // The facade constructor establishes the WebSocket connection.
-    public WebsocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
+    public WebsocketFacade(String url, ServerMessageHandler notificationHandler) throws ResponseException {
         try {
             // Convert the HTTP URL to a WebSocket URL and add the /ws endpoint.
             url = url.replace("http", "ws");
@@ -37,8 +38,8 @@ public class WebsocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = gson.fromJson(message, Notification.class);
-                    notificationHandler.notify(notification);
+                    ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+                    notificationHandler.notify(serverMessage, message);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -77,9 +78,9 @@ public class WebsocketFacade extends Endpoint {
     }
 
     // Sends a move command. The ChessMove object should represent your move data.
-    public void makeMove(int gameID, ChessMove move) throws ResponseException {
+    public void makeMove(int gameID, ChessMove move, boolean isWhite) throws ResponseException {
         try {
-            MakeMove command = new MakeMove(authtoken, gameID, move);
+            MakeMove command = new MakeMove(authtoken, gameID, move, isWhite);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {

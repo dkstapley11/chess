@@ -1,9 +1,14 @@
 package ui;
 
 import chess.*;
+
+import java.util.Collection;
+
 import static ui.EscapeSequences.*;
 
 public class ChessBoardPrinter {
+
+    private static final String SET_BG_COLOR_HIGHLIGHT = "\u001B[43m";
 
     public static void printBoard(ChessBoard chessBoard, boolean whitePerspective) {
         System.out.println(getFileLabels(whitePerspective));
@@ -19,6 +24,71 @@ public class ChessBoardPrinter {
         }
 
         System.out.println(getFileLabels(whitePerspective));
+    }
+
+    public static void printBoardWithHighlights(ChessBoard chessBoard, boolean whitePerspective, Collection<ChessMove> legalMoves) {
+        System.out.println(getFileLabels(whitePerspective));
+
+        if (whitePerspective) {
+            for (int rank = 8; rank >= 1; rank--) {
+                printRankLineWithHighlights(chessBoard, rank, whitePerspective, legalMoves);
+            }
+        } else {
+            for (int rank = 1; rank <= 8; rank++) {
+                printRankLineWithHighlights(chessBoard, rank, whitePerspective, legalMoves);
+            }
+        }
+
+        System.out.println(getFileLabels(whitePerspective));
+    }
+
+    /**
+     * Helper method that prints a single rank (row) with highlighted legal move squares if applicable.
+     */
+    private static void printRankLineWithHighlights(ChessBoard chessBoard, int rank, boolean whitePerspective, Collection<ChessMove> legalMoves) {
+        // Print left rank border.
+        System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + String.format(" %2d ", rank)
+                + RESET_BG_COLOR + RESET_TEXT_COLOR);
+
+        if (whitePerspective) {
+            for (int file = 1; file <= 8; file++) {
+                ChessPosition pos = new ChessPosition(rank, file);
+                // Check if any legal move has an end position matching the current square.
+                boolean highlight = isLegalMoveTarget(pos, legalMoves);
+                String squareBg = highlight ? SET_BG_COLOR_HIGHLIGHT : getSquareBgColor(rank, file);
+                ChessPiece piece = chessBoard.getPiece(pos);
+                String pieceStr = getPieceIcon(piece);
+                String cell = String.format(" %3s ", pieceStr);
+                System.out.print(squareBg + cell + RESET_BG_COLOR);
+            }
+        } else {
+            for (int file = 8; file >= 1; file--) {
+                ChessPosition pos = new ChessPosition(rank, file);
+                boolean highlight = isLegalMoveTarget(pos, legalMoves);
+                String squareBg = highlight ? SET_BG_COLOR_HIGHLIGHT : getSquareBgColor(rank, file);
+                ChessPiece piece = chessBoard.getPiece(pos);
+                String pieceStr = getPieceIcon(piece);
+                String cell = String.format(" %3s ", pieceStr);
+                System.out.print(squareBg + cell + RESET_BG_COLOR);
+            }
+        }
+
+        // Print the right rank border.
+        System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + String.format(" %2d ", rank)
+                + RESET_BG_COLOR + RESET_TEXT_COLOR);
+    }
+
+    /**
+     * Helper method to determine if the current position is a legal move target.
+     * It iterates over the collection of legal moves and compares each move's end position.
+     */
+    private static boolean isLegalMoveTarget(ChessPosition pos, Collection<ChessMove> legalMoves) {
+        for (ChessMove move : legalMoves) {
+            if (move.getEndPosition().equals(pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void printStartBoard(boolean whitePerspective) {

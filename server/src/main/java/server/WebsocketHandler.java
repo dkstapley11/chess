@@ -107,7 +107,7 @@ public class WebsocketHandler {
                     String.format("%s has joined the game as %s", auth.username(), command.getColor()));
             broadcastMessage(session, notif);
 
-            LoadGame load = new LoadGame(game.game());
+            LoadGame load = new LoadGame(game.game().getBoard());
             sendMessage(session, load);
         } catch (ResponseException e) {
             sendMessage(session, new Error(e.getMessage()));
@@ -125,7 +125,7 @@ public class WebsocketHandler {
                     String.format("%s has joined the game as an observer", auth.username()));
             broadcastMessage(session, notif);
 
-            LoadGame load = new LoadGame(game.game());
+            LoadGame load = new LoadGame(game.game().getBoard());
             sendMessage(session, load);
         } catch (Exception e) {
             sendMessage(session, new Error("Error: Not authorized"));
@@ -175,7 +175,7 @@ public class WebsocketHandler {
             // Update the game in the database.
             Server.gameService.updateGame(auth.authToken(), game);
 
-            LoadGame load = new LoadGame(game.game());
+            LoadGame load = new LoadGame(game.game().getBoard());
             broadcastMessage(session, load, true);
         } catch (ResponseException e) {
             sendMessage(session, new Error(e.getMessage()));

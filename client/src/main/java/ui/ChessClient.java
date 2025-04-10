@@ -2,18 +2,25 @@ package ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 
+import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.Gson;
 import model.UserData;
 import exception.ResponseException;
-import ui.websocket.NotificationHandler;
+import ui.websocket.ServerMessageHandler;
 import ui.websocket.WebsocketFacade;
 import websocket.commands.Leave;
+import websocket.messages.Error;
+import websocket.messages.LoadGame;
 import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
 
-public class ChessClient {
+public class ChessClient implements ServerMessageHandler {
     private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
@@ -21,14 +28,34 @@ public class ChessClient {
     // Holds the game IDs in the order they were listed.
     private ArrayList<Integer> lastGameIds = new ArrayList<>();
     private WebsocketFacade ws;
-    private final NotificationHandler notificationHandler;
+    private final ServerMessageHandler notificationHandler;
     boolean whitePerspective = true;
     int currentGame;
+    private ChessBoard board;
 
-    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
+    public ChessClient(String serverUrl, ServerMessageHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
         this.notificationHandler = notificationHandler;
+    }
+
+    @Override
+    public void notify(ServerMessage message, String strMessage) {
+        switch(message.getServerMessageType()) {
+            case LOAD_GAME: {
+                LoadGame loadGame = new Gson().fromJson(strMessage, LoadGame.class);
+                ChessBoardPrinter.printBoard(loadGame.getGame(), whitePerspective);
+                board = loadGame.getGame();
+            }
+            case ERROR: {
+                Error error = new Gson().fromJson(strMessage, Error.class);
+                System.out.println(error.getErrorMessage());
+            }
+            case NOTIFICATION: {
+                Notification notification = new Gson().fromJson(strMessage, Notification.class);
+                System.out.println(notification.getMessage());
+            }
+        }
     }
 
     public String eval(String input) throws ResponseException {
@@ -41,8 +68,7 @@ public class ChessClient {
                     case "help":
                         return gameplayHelp();
                     case "redraw":
-                        // Redraw the board (this example simply reprints the starting board).
-                        ChessBoardPrinter.printStartBoard(whitePerspective);
+                        ChessBoardPrinter.printBoard(board, whitePerspective);
                         return "Board redrawn.";
                     case "move":
                         if (params.length >= 3 && params[1].matches("[a-h][1-8]") && params[2].matches("[a-h][1-8]")) {
@@ -57,11 +83,10 @@ public class ChessClient {
                                 }
                             }
 
-                            ws.makeMove(currentGame, new ChessMove(from, to, promotion));
+                            ws.makeMove(currentGame, new ChessMove(from, to, promotion), whitePerspective);
                         }
                         else {
                             System.out.println("Please provide a to and from coordinate (ex: 'c3 d5')");
-                            printMakeMove();
                         }
                     case "resign":
                         ws.resignGame(currentGame);
@@ -75,7 +100,9 @@ public class ChessClient {
                             int row = Integer.parseInt(params[0]);
                             int col = Integer.parseInt(params[1]);
                             // This is a local UI operation.
-                            ChessBoardPrinter.highlightLegalMoves(row, col);
+                            ChessPosition position = new ChessPosition(row, col);
+                            Collection<ChessMove> moves = board.getPiece(position).pieceMoves(board, position);
+                            ChessBoardPrinter.printBoardWithHighlights(board, whitePerspective, moves);
                             return "Highlighted legal moves for piece at (" + row + ", " + col + ").";
                         } catch (NumberFormatException ex) {
                             throw new ResponseException(400, "Invalid coordinates.");
