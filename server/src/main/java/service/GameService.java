@@ -84,11 +84,11 @@ public class GameService {
         String username = auth.username();
 
         String playerColor = joinRequest.playerColor();
-        if (playerColor != null) {
-            playerColor = playerColor.toUpperCase(); // Normalize case
-        } else {
-            throw new ResponseException(400, "Error: bad request: null color provided");
+        if (playerColor == null) {
+            return true;
         }
+
+        playerColor = playerColor.toUpperCase();
 
         // Validate the color choice
         if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {

@@ -43,13 +43,13 @@ public class WebsocketHandler {
             // First, deserialize to the base class to determine the command type.
             UserGameCommand baseCommand = gson.fromJson(message, UserGameCommand.class);
             switch (baseCommand.getCommandType()) {
-                case JOIN_PLAYER:
-                    JoinPlayer joinPlayer = gson.fromJson(message, JoinPlayer.class);
-                    handleJoinPlayerCommand(session, joinPlayer);
-                    break;
-                case JOIN_OBSERVER:
-                    JoinObserver joinObserver = gson.fromJson(message, JoinObserver.class);
-                    handleJoinObserverCommand(session, joinObserver);
+                case CONNECT:
+                    Connect joinPlayer = gson.fromJson(message, Connect.class);
+                    if (joinPlayer.getColor() != null) {
+                        handleJoinPlayerCommand(session, joinPlayer);
+                    } else {
+                        handleJoinObserverCommand(session, joinPlayer);
+                    }
                     break;
                 case MAKE_MOVE:
                     MakeMove makeMove = gson.fromJson(message, MakeMove.class);
@@ -79,7 +79,7 @@ public class WebsocketHandler {
         error.printStackTrace();
     }
 
-    private void handleJoinPlayerCommand(Session session, JoinPlayer command) throws Exception {
+    private void handleJoinPlayerCommand(Session session, Connect command) throws Exception {
         try {
             AuthData auth = Server.userService.getAuth(command.getAuthToken());
             GameData game = Server.gameService.getGameData(command.getAuthToken(), command.getGameID());
@@ -87,19 +87,7 @@ public class WebsocketHandler {
             ChessGame.TeamColor joiningColor =
                     command.getColor().equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
 
-            // Check that the player's username matches the expected color assignment.
-            boolean correctColor;
-            if (joiningColor == ChessGame.TeamColor.WHITE) {
-                correctColor = Objects.equals(game.whiteUsername(), auth.username());
-            } else {
-                correctColor = Objects.equals(game.blackUsername(), auth.username());
-            }
 
-            if (!correctColor) {
-                Error error = new Error("Error: attempting to join with wrong color");
-                sendMessage(session, error);
-                return;
-            }
 
             Server.gameSessions.put(session, command.getGameID());
 
@@ -114,7 +102,7 @@ public class WebsocketHandler {
         }
     }
 
-    private void handleJoinObserverCommand(Session session, JoinObserver command) throws Exception {
+    private void handleJoinObserverCommand(Session session, Connect command) throws Exception {
         try {
             AuthData auth = Server.userService.getAuth(command.getAuthToken());
             GameData game = Server.gameService.getGameData(command.getAuthToken(), command.getGameID());

@@ -23,8 +23,7 @@ public class UserGameCommand {
     }
 
     public enum CommandType {
-        JOIN_PLAYER,
-        JOIN_OBSERVER,
+        CONNECT,
         MAKE_MOVE,
         LEAVE,
         RESIGN

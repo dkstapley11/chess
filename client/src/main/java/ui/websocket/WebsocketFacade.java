@@ -3,11 +3,8 @@ package ui.websocket;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import websocket.commands.JoinObserver;
-import websocket.commands.JoinPlayer;
-import websocket.commands.Leave;
-import websocket.commands.MakeMove;
-import websocket.commands.Resign;
+import websocket.commands.*;
+import websocket.commands.Connect;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -24,12 +21,13 @@ public class WebsocketFacade extends Endpoint {
     String authtoken;
 
     // The facade constructor establishes the WebSocket connection.
-    public WebsocketFacade(String url, ServerMessageHandler notificationHandler) throws ResponseException {
+    public WebsocketFacade(String url, ServerMessageHandler notificationHandler, String authtoken) throws ResponseException {
         try {
             // Convert the HTTP URL to a WebSocket URL and add the /ws endpoint.
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
             this.notificationHandler = notificationHandler;
+            this.authtoken = authtoken;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -58,7 +56,7 @@ public class WebsocketFacade extends Endpoint {
     // Joins a game as a player. The caller must supply the auth token, game ID, and desired color.
     public void joinAsPlayer(int gameID, String color) throws ResponseException {
         try {
-            JoinPlayer command = new JoinPlayer(authtoken, gameID, color);
+            Connect command = new Connect(authtoken, gameID, color);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {
@@ -69,7 +67,7 @@ public class WebsocketFacade extends Endpoint {
     // Joins a game as an observer.
     public void joinAsObserver(int gameID) throws ResponseException {
         try {
-            JoinObserver command = new JoinObserver(authtoken, gameID);
+            Connect command = new Connect(authtoken, gameID, null);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {

@@ -3,7 +3,6 @@ package ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -14,7 +13,6 @@ import model.UserData;
 import exception.ResponseException;
 import ui.websocket.ServerMessageHandler;
 import ui.websocket.WebsocketFacade;
-import websocket.commands.Leave;
 import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
@@ -71,25 +69,46 @@ public class ChessClient implements ServerMessageHandler {
                         ChessBoardPrinter.printBoard(board, whitePerspective);
                         return "Board redrawn.";
                     case "move":
-                        if (params.length >= 3 && params[1].matches("[a-h][1-8]") && params[2].matches("[a-h][1-8]")) {
-                            ChessPosition from = new ChessPosition(params[1].charAt(1) - '0', params[1].charAt(0) - ('a'-1));
-                            ChessPosition to = new ChessPosition(params[2].charAt(1) - '0',params[2].charAt(0) - ('a'-1));
+                        // Expect: move <from> <to> [promotion]
+                        if (params.length < 2 || params.length > 3) {
+                            return "Usage: move <from> <to> [promotion]\n" +
+                                    "Example: move e2 e4 or move e7 e8 queen";
+                        }
 
-                            ChessPiece.PieceType promotion = null;
-                            if (params.length == 4) {
-                                promotion = getPieceType(params[3]);
-                                if (promotion == null) {
-                                    System.out.println("Please provide proper promotion piece name (ex: 'knight')");
-                                }
+                        // coords must be a-h + 1-8
+                        if (!params[0].matches("[a-h][1-8]") ||
+                                !params[1].matches("[a-h][1-8]")) {
+                            return "Invalid coordinates. Use files a–h and ranks 1–8 (e.g. e2 e4).";
+                        }
+
+                        // parse positions
+                        ChessPosition from = new ChessPosition(
+                                params[0].charAt(1) - '0',
+                                params[0].charAt(0) - ('a' - 1)
+                        );
+                        ChessPosition to   = new ChessPosition(
+                                params[1].charAt(1) - '0',
+                                params[1].charAt(0) - ('a' - 1)
+                        );
+
+                        // optional promotion
+                        ChessPiece.PieceType promotion = null;
+                        if (params.length == 3) {
+                            promotion = getPieceType(params[2]);
+                            if (promotion == null) {
+                                return "Unknown promotion piece: '" + params[2] +
+                                        "'. Valid options: queen, rook, bishop, knight.";
                             }
+                        }
 
-                            ws.makeMove(currentGame, new ChessMove(from, to, promotion), whitePerspective);
-                        }
-                        else {
-                            System.out.println("Please provide a to and from coordinate (ex: 'c3 d5')");
-                        }
+                        // perform the move
+                        ws.makeMove(currentGame, new ChessMove(from, to, promotion), whitePerspective);
+                        return String.format("Moved from %s to %s%s.",
+                                params[0], params[1],
+                                promotion != null ? " promoting to " + promotion : "");
                     case "resign":
                         ws.resignGame(currentGame);
+                        state = State.SIGNEDIN;
                         return "You resigned from the game.";
                     case "highlight":
                         // Usage: highlight <row> <col>
@@ -218,7 +237,8 @@ public class ChessClient implements ServerMessageHandler {
         int id = lastGameIds.get(gameNumber - 1);
         currentGame = id;
         // For joinGame, we use a default color, e.g., WHITE.
-        ws = new WebsocketFacade(serverUrl, notificationHandler);
+        server.joinGame(params[1], id);
+        ws = new WebsocketFacade(serverUrl, notificationHandler, server.authtoken);
         ws.joinAsPlayer(id, params[1]);
         String color = params[1];
         if (color.equals("white")) {
@@ -232,7 +252,7 @@ public class ChessClient implements ServerMessageHandler {
         }
         ChessBoardPrinter.printStartBoard(whitePerspective);
         state = State.PLAYING;
-        return "You joined game number " + gameNumber +  "as the" + color + "player";
+        return "You joined game number " + gameNumber +  " as the" + color + "player";
     }
 
     /**
@@ -262,6 +282,7 @@ public class ChessClient implements ServerMessageHandler {
         server.joinGame(null, id);
         ChessBoardPrinter.printStartBoard(true);  // Observers view from white's perspective.
         state = State.PLAYING;
+        ws = new WebsocketFacade(serverUrl, notificationHandler, server.authtoken);
         ws.joinAsObserver(id);
         return "You are now observing game number " + gameNumber + ". Enter gameplay commands (help for commands).";
     }
