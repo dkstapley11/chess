@@ -56,4 +56,9 @@ public class RamGameDAO implements GameDAO {
     public HashSet<GameData> listGames() {
         return new HashSet<>(database);
     }
+
+    @Override
+    public void removePlayer(int gameID, String color) throws ResponseException {
+        return;
+    }
 }

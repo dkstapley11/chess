@@ -51,6 +51,17 @@ public class SQLGameDAO implements GameDAO {
         return new GameData(gameID, white, black, name, chessGame);
     }
 
+    public void removePlayer(String color, int gameID) throws ResponseException {
+        if (color == "WHITE") {
+            var statement = "UPDATE game SET whiteUsername=null WHERE gameID=?";
+            executeUpdate(statement, gameID);
+        }
+        if (color == "BLACK") {
+            var statement = "UPDATE game SET blackUsername=null WHERE gameID=?";
+            executeUpdate(statement, gameID);
+        }
+    }
+
     @Override
     public void updateGame(GameData game) throws ResponseException {
         var statement = "UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, chessGame=? WHERE gameID=?";
@@ -95,6 +106,18 @@ public class SQLGameDAO implements GameDAO {
             throw new ResponseException(500, "Unable to retrieve games: " + e.getMessage());
         }
         return games;
+    }
+
+    @Override
+    public void removePlayer(int gameID, String color) throws ResponseException {
+        if (color.equals("white")) {
+            var statement = "UPDATE game SET whiteUsername=null WHERE gameID=?";
+            executeUpdate(statement, gameID);
+        }
+        if (color.equals("black")) {
+            var statement = "UPDATE game SET blackUsername=null WHERE gameID=?";
+            executeUpdate(statement, gameID);
+        }
     }
 
     private String serializeGame(ChessGame game) {

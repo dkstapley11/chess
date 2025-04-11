@@ -47,6 +47,10 @@ public class GameService {
         return res;
     }
 
+    public void leavePlayer(String color, int gameID) throws ResponseException {
+        gDAO.removePlayer(gameID, color);
+    }
+
     public GameListResponse listGames(String authToken) throws ResponseException {
         if (aDAO.getAuth(authToken) == null) {
             throw new ResponseException(401, "Error: Invalid authentication token");
@@ -84,8 +88,9 @@ public class GameService {
         String username = auth.username();
 
         String playerColor = joinRequest.playerColor();
+
         if (playerColor == null) {
-            return true;
+            throw new ResponseException(400, "Error: bad request: Invalid player color. Choose 'WHITE' or 'BLACK'.");
         }
 
         playerColor = playerColor.toUpperCase();

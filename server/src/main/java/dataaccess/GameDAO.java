@@ -17,4 +17,6 @@ public interface GameDAO {
 
     HashSet<GameData> listGames() throws ResponseException;
 
+    void removePlayer(int gameID, String color) throws ResponseException;
+
 }

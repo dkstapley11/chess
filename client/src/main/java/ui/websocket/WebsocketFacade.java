@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-// The WebsocketFacade extends Endpoint so that it can be registered with the container.
 public class WebsocketFacade extends Endpoint {
 
     private Session session;
@@ -20,7 +19,6 @@ public class WebsocketFacade extends Endpoint {
     private final Gson gson = new Gson();
     String authtoken;
 
-    // The facade constructor establishes the WebSocket connection.
     public WebsocketFacade(String url, ServerMessageHandler notificationHandler, String authtoken) throws ResponseException {
         try {
             // Convert the HTTP URL to a WebSocket URL and add the /ws endpoint.
@@ -32,7 +30,6 @@ public class WebsocketFacade extends Endpoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            // Set a message handler that deserializes incoming messages into a Notification and passes it to our handler.
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
@@ -45,18 +42,15 @@ public class WebsocketFacade extends Endpoint {
         }
     }
 
-    // onOpen is required by the Endpoint API; you can add logic here if needed.
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         System.out.println("WebSocket connection opened.");
     }
 
-    // === Public API Methods ===
 
-    // Joins a game as a player. The caller must supply the auth token, game ID, and desired color.
-    public void joinAsPlayer(int gameID, String color) throws ResponseException {
+    public void joinAsPlayer(int gameID) throws ResponseException {
         try {
-            Connect command = new Connect(authtoken, gameID, color);
+            Connect command = new Connect(authtoken, gameID);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {
@@ -67,7 +61,7 @@ public class WebsocketFacade extends Endpoint {
     // Joins a game as an observer.
     public void joinAsObserver(int gameID) throws ResponseException {
         try {
-            Connect command = new Connect(authtoken, gameID, null);
+            Connect command = new Connect(authtoken, gameID);
             String json = gson.toJson(command);
             this.session.getBasicRemote().sendText(json);
         } catch (IOException ex) {

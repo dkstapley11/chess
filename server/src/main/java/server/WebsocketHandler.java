@@ -45,9 +45,15 @@ public class WebsocketHandler {
             switch (baseCommand.getCommandType()) {
                 case CONNECT:
                     Connect joinPlayer = gson.fromJson(message, Connect.class);
-                    if (joinPlayer.getColor() != null) {
+                    GameData game = Server.gameService.getGameData(joinPlayer.getAuthToken(), joinPlayer.getGameID());
+                    AuthData auth = Server.userService.getAuth(joinPlayer.getAuthToken());
+                    if (auth.username().equals(game.whiteUsername())) {
                         handleJoinPlayerCommand(session, joinPlayer);
-                    } else {
+                    }
+                    else if (auth.username().equals(game.blackUsername())){
+                        handleJoinPlayerCommand(session, joinPlayer);
+                    }
+                    else {
                         handleJoinObserverCommand(session, joinPlayer);
                     }
                     break;
@@ -84,15 +90,20 @@ public class WebsocketHandler {
             AuthData auth = Server.userService.getAuth(command.getAuthToken());
             GameData game = Server.gameService.getGameData(command.getAuthToken(), command.getGameID());
 
-            ChessGame.TeamColor joiningColor =
-                    command.getColor().equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            ChessGame.TeamColor joiningColor;
 
+            if (auth.username().equals(game.whiteUsername())) {
+                joiningColor = ChessGame.TeamColor.WHITE;
+            }
+            else {
+                joiningColor = ChessGame.TeamColor.BLACK;
+            }
 
 
             Server.gameSessions.put(session, command.getGameID());
 
             Notification notif = new Notification(
-                    String.format("%s has joined the game as %s", auth.username(), command.getColor()));
+                    String.format("%s has joined the game as %s", auth.username(), joiningColor));
             broadcastMessage(session, notif);
 
             LoadGame load = new LoadGame(game.game().getBoard());
@@ -106,6 +117,10 @@ public class WebsocketHandler {
         try {
             AuthData auth = Server.userService.getAuth(command.getAuthToken());
             GameData game = Server.gameService.getGameData(command.getAuthToken(), command.getGameID());
+
+            if (game == null) {
+                return;
+            }
 
             Server.gameSessions.put(session, command.getGameID());
 
@@ -143,22 +158,24 @@ public class WebsocketHandler {
             game.game().makeMove(command.getMove());
 
             Notification notif;
+            notif = new Notification(String.format("A move has been made by %s", auth.username()));
+            broadcastMessage(session, notif, false);
             ChessGame.TeamColor opponentColor =
                     userColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             if (game.game().isInCheckmate(opponentColor)) {
                 notif = new Notification(String.format("Checkmate! %s wins!", auth.username()));
                 game.game().setGameOver(true);
+                broadcastMessage(session, notif, true);
             } else if (game.game().isInStalemate(opponentColor)) {
                 notif = new Notification(String.format("Stalemate caused by %s's move! It's a tie!", auth.username()));
                 game.game().setGameOver(true);
+                broadcastMessage(session, notif, true);
             } else if (game.game().isInCheck(opponentColor)) {
                 notif = new Notification(String.format("A move has been made by %s, %s is now in check!",
                         auth.username(), opponentColor));
-            } else {
-                notif = new Notification(String.format("A move has been made by %s", auth.username()));
+                broadcastMessage(session, notif, false);
             }
-            // Broadcast the notification to all clients in this game.
-            broadcastMessage(session, notif, true);
+
 
             // Update the game in the database.
             Server.gameService.updateGame(auth.authToken(), game);
@@ -173,9 +190,16 @@ public class WebsocketHandler {
     }
 
     // Handles a LEAVE command.
-    private void handleLeaveCommand(Session session, Leave command) throws ResponseException {
+    private void handleLeaveCommand(Session session, Leave command) throws Exception {
         try {
             AuthData auth = Server.userService.getAuth(command.getAuthToken());
+            GameData game = Server.gameService.getGameData(command.getAuthToken(), command.getGameID());
+            if (auth.username().equals(game.whiteUsername())) {
+                Server.gameService.leavePlayer("white", game.gameID());
+            }
+            if (auth.username().equals(game.blackUsername())) {
+                Server.gameService.leavePlayer("black", game.gameID());
+            }
             Notification notif = new Notification(String.format("%s has left the game", auth.username()));
             broadcastMessage(session, notif);
             session.close();
