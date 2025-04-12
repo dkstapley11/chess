@@ -239,7 +239,7 @@ public class ChessClient implements ServerMessageHandler {
         // For joinGame, we use a default color, e.g., WHITE.
         server.joinGame(params[1], id);
         ws = new WebsocketFacade(serverUrl, notificationHandler, server.authtoken);
-        ws.joinAsPlayer(id);
+        ws.joinGame(id);
         String color = params[1];
         if (color.equals("white")) {
             whitePerspective = true;
@@ -283,7 +283,7 @@ public class ChessClient implements ServerMessageHandler {
         ChessBoardPrinter.printStartBoard(true);  // Observers view from white's perspective.
         state = State.PLAYING;
         ws = new WebsocketFacade(serverUrl, notificationHandler, server.authtoken);
-        ws.joinAsObserver(id);
+        ws.joinGame(id);
         return "You are now observing game number " + gameNumber + ". Enter gameplay commands (help for commands).";
     }
 

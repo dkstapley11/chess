@@ -7,13 +7,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 
+import static dataaccess.ConfigureDatabase.configure;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class SQLUserDAO implements UserDAO {
 
     public SQLUserDAO() throws ResponseException {
-        configureUserDatabase();
+        String[] createStatements = {
+                """
+            CREATE TABLE IF NOT EXISTS user (
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`)
+            )
+            """
+        };
+        configure(createStatements);
     }
 
     @Override
@@ -50,7 +61,7 @@ public class SQLUserDAO implements UserDAO {
     @Override
     public boolean authenticateUser(String username, String password) throws ResponseException {
         return passwordMatches(password, username);
-    };
+    }
 
     @Override
     public void clear() throws ResponseException {
@@ -104,17 +115,6 @@ public class SQLUserDAO implements UserDAO {
         return users;
     }
 
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS user (
-              `username` varchar(256) NOT NULL,
-              `password` varchar(256) NOT NULL,
-              `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`)
-            )
-            """
-    };
-
     private int executeUpdate(String statement, Object... params) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -144,19 +144,6 @@ public class SQLUserDAO implements UserDAO {
             }
         } catch (SQLException e) {
             throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
-
-    private void configureUserDatabase() throws ResponseException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
 }

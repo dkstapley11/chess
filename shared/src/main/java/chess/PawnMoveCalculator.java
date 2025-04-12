@@ -43,7 +43,7 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
         // diagonal captures
         // if not out of bounds, not empty, is an enemy piece, and not a promotion...
         if (
-                !outOfBounds(diagRight.getRow(), diagRight.getColumn()) &&
+                !position.outOfBounds(diagRight.getRow(), diagRight.getColumn()) &&
                 !squareEmpty(board, diagRight) &&
                 board.getPiece(diagRight).getTeamColor() !=
                 color &&
@@ -54,7 +54,7 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
         }
         // same for diagLeft
         if (
-                !outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) &&
+                !position.outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) &&
                 !squareEmpty(board, diagLeft) &&
                 board.getPiece(diagLeft).getTeamColor() !=
                 color &&
@@ -65,7 +65,7 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
         }
         // now diagonal promotion moves. if not out of bounds, not empty, enemy piece, and on 8th or 1st rank...
         if (
-                !outOfBounds(diagRight.getRow(), diagRight.getColumn()) &&
+                !position.outOfBounds(diagRight.getRow(), diagRight.getColumn()) &&
                 !squareEmpty(board, diagRight) &&
                 board.getPiece(diagRight).getTeamColor() != color
                 && (row + direction == 8 ||
@@ -74,7 +74,7 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
             addPromotions(moves, position, diagRight);
         }
         if (
-                !outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) &&
+                !position.outOfBounds(diagLeft.getRow(), diagLeft.getColumn()) &&
                 !squareEmpty(board, diagLeft) &&
                 board.getPiece(diagLeft).getTeamColor() != color &&
                 (row + direction == 8
@@ -101,22 +101,6 @@ public class PawnMoveCalculator implements ChessPieceMoveCalculator {
         moves.add(new ChessMove(position, target, ChessPiece.PieceType.KNIGHT));
         moves.add(new ChessMove(position, target, ChessPiece.PieceType.ROOK));
         moves.add(new ChessMove(position, target, ChessPiece.PieceType.BISHOP));
-    }
-
-    public boolean outOfBounds(int row, int col) {
-        if (row > 8) {
-            return true;
-        }
-        if (col > 8) {
-            return true;
-        }
-        if (row < 1) {
-            return true;
-        }
-        if (col < 1) {
-            return true;
-        }
-        return false;
     }
 
     public boolean squareEmpty(ChessBoard board, ChessPosition position) {

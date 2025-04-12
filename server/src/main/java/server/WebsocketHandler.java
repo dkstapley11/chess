@@ -19,8 +19,6 @@ import java.util.Objects;
 @WebSocket
 public class WebsocketHandler {
 
-    private static final Gson gson = new Gson();
-
     @OnWebSocketConnect
     public void onConnect(Session session) {
         System.out.println("New WebSocket connection established: " + session.getRemoteAddress().getAddress());
@@ -41,10 +39,10 @@ public class WebsocketHandler {
 
         try {
             // First, deserialize to the base class to determine the command type.
-            UserGameCommand baseCommand = gson.fromJson(message, UserGameCommand.class);
+            UserGameCommand baseCommand = new Gson().fromJson(message, UserGameCommand.class);
             switch (baseCommand.getCommandType()) {
                 case CONNECT:
-                    Connect joinPlayer = gson.fromJson(message, Connect.class);
+                    Connect joinPlayer = new Gson().fromJson(message, Connect.class);
                     GameData game = Server.gameService.getGameData(joinPlayer.getAuthToken(), joinPlayer.getGameID());
                     AuthData auth = Server.userService.getAuth(joinPlayer.getAuthToken());
                     if (auth.username().equals(game.whiteUsername())) {
@@ -58,15 +56,15 @@ public class WebsocketHandler {
                     }
                     break;
                 case MAKE_MOVE:
-                    MakeMove makeMove = gson.fromJson(message, MakeMove.class);
+                    MakeMove makeMove = new Gson().fromJson(message, MakeMove.class);
                     handleMakeMoveCommand(session, makeMove);
                     break;
                 case LEAVE:
-                    Leave leave = gson.fromJson(message, Leave.class);
+                    Leave leave = new Gson().fromJson(message, Leave.class);
                     handleLeaveCommand(session, leave);
                     break;
                 case RESIGN:
-                    Resign resign = gson.fromJson(message, Resign.class);
+                    Resign resign = new Gson().fromJson(message, Resign.class);
                     handleResignCommand(session, resign);
                     break;
                 default:
@@ -246,7 +244,7 @@ public class WebsocketHandler {
     private void sendMessage(Session session, ServerMessage message) {
         try {
             if (session.isOpen()) {
-                session.getRemote().sendString(gson.toJson(message));
+                session.getRemote().sendString(new Gson().toJson(message));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -259,7 +257,7 @@ public class WebsocketHandler {
     }
 
     public void broadcastMessage(Session currSession, ServerMessage message, boolean toSelf) throws IOException {
-        System.out.printf("Broadcasting (toSelf: %s): %s%n", toSelf, gson.toJson(message));
+        System.out.printf("Broadcasting (toSelf: %s): %s%n", toSelf, new Gson().toJson(message));
         for (Session session : Server.gameSessions.keySet()) {
             boolean inAGame = !Objects.equals(Server.gameSessions.get(session), 0);
             boolean sameGame = Server.gameSessions.get(session).equals(Server.gameSessions.get(currSession));

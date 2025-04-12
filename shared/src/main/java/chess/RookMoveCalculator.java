@@ -31,7 +31,7 @@ public class RookMoveCalculator implements ChessPieceMoveCalculator {
             row += rowOffset;
             col += colOffset;
             ChessPosition target = new ChessPosition(row, col);
-            if (outOfBounds(row, col)) {
+            if (position.outOfBounds(row, col)) {
                 break;
             }
             if (squareEmpty(board, target)) {
@@ -43,22 +43,6 @@ public class RookMoveCalculator implements ChessPieceMoveCalculator {
                 break;
             }
         }
-    }
-
-    public boolean outOfBounds(int row, int col) {
-        if (row > 8) {
-            return true;
-        }
-        if (col > 8) {
-            return true;
-        }
-        if (row < 1) {
-            return true;
-        }
-        if (col < 1) {
-            return true;
-        }
-        return false;
     }
 
     public boolean squareEmpty(ChessBoard board, ChessPosition position) {

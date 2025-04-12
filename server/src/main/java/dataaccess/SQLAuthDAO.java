@@ -5,13 +5,21 @@ import model.AuthData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
-
+import static dataaccess.ConfigureDatabase.configure;
 import static java.sql.Types.NULL;
 
 public class SQLAuthDAO implements AuthDAO {
 
     public SQLAuthDAO() throws ResponseException {
-        configureAuthDatabase();
+        String[] createStatements = {
+                """            
+            CREATE TABLE if NOT EXISTS auth (
+            username VARCHAR(255) NOT NULL,
+            authToken VARCHAR(255) NOT NULL,
+            PRIMARY KEY (authToken)
+            )"""
+        };
+        configure(createStatements);
     }
 
     @Override
@@ -80,7 +88,9 @@ public class SQLAuthDAO implements AuthDAO {
             try (var ps = conn.prepareStatement(statement)) { // No RETURN_GENERATED_KEYS for DELETE
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
+                    if (param instanceof String p) {
+                        ps.setString(i + 1, p);
+                    }
                     else if (param instanceof Integer p) {
                         ps.setInt(i + 1, p);
                     }
@@ -89,32 +99,11 @@ public class SQLAuthDAO implements AuthDAO {
                     }
                 }
 
-                return ps.executeUpdate(); // This returns affected rows correctly
+                return ps.executeUpdate();
             }
         } catch (SQLException e) {
             throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
     }
 
-    private final String[] createStatements = {
-            """            
-            CREATE TABLE if NOT EXISTS auth (
-            username VARCHAR(255) NOT NULL,
-            authToken VARCHAR(255) NOT NULL,
-            PRIMARY KEY (authToken)
-            )"""
-    };
-
-    private void configureAuthDatabase() throws ResponseException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 }

@@ -18,6 +18,22 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public boolean outOfBounds(int row, int col) {
+        if (row > 8) {
+            return true;
+        }
+        if (col > 8) {
+            return true;
+        }
+        if (row < 1) {
+            return true;
+        }
+        if (col < 1) {
+            return true;
+        }
+        return false;
+    }
+
     public int getRow() {
         return row;
     }

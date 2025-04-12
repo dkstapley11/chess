@@ -27,7 +27,7 @@ public class KingMoveCalculator implements ChessPieceMoveCalculator {
     public boolean validateMove(ChessBoard board, ChessPosition position, int[] move, ChessGame.TeamColor color) {
         int targetRow = position.getRow() + move[0];
         int targetCol = position.getColumn() + move[1];
-        if (outOfBounds(targetRow, targetCol)) {
+        if (position.outOfBounds(targetRow, targetCol)) {
             return false;
         }
         ChessPosition target = new ChessPosition(targetRow, targetCol);
@@ -39,22 +39,6 @@ public class KingMoveCalculator implements ChessPieceMoveCalculator {
             return true;
         }
         // can only mean friendly piece
-        return false;
-    }
-
-    public boolean outOfBounds(int row, int col) {
-        if (row > 8) {
-            return true;
-        }
-        if (col > 8) {
-            return true;
-        }
-        if (row < 1) {
-            return true;
-        }
-        if (col < 1) {
-            return true;
-        }
         return false;
     }
 
