@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import com.google.gson.Gson;
 import model.UserData;
 import exception.ResponseException;
@@ -120,7 +117,9 @@ public class ChessClient implements ServerMessageHandler {
                             int col = Integer.parseInt(params[1]);
                             // This is a local UI operation.
                             ChessPosition position = new ChessPosition(row, col);
-                            Collection<ChessMove> moves = board.getPiece(position).pieceMoves(board, position);
+                            ChessGame game = new ChessGame();
+                            game.setBoard(board);
+                            Collection<ChessMove> moves = game.validMoves(position);
                             ChessBoardPrinter.printBoardWithHighlights(board, whitePerspective, moves);
                             return "Highlighted legal moves for piece at (" + row + ", " + col + ").";
                         } catch (NumberFormatException ex) {
@@ -278,8 +277,6 @@ public class ChessClient implements ServerMessageHandler {
         }
         int id = lastGameIds.get(gameNumber - 1);
         currentGame = id;
-        // Join game as spectator (pass null for color).
-        server.joinGame(null, id);
         ChessBoardPrinter.printStartBoard(true);  // Observers view from white's perspective.
         state = State.PLAYING;
         ws = new WebsocketFacade(serverUrl, notificationHandler, server.authtoken);

@@ -311,8 +311,7 @@ public class ChessGame {
                         !isSquareEmpty(board, diagLeft) &&
                         board.getPiece(diagLeft).getPieceType() == ChessPiece.PieceType.PAWN &&
                         board.getPiece(diagLeft).getTeamColor() != color
-                )
-                {
+                ) {
                     return true;
                 }
             }
