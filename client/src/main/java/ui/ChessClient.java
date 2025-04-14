@@ -3,6 +3,7 @@ package ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Scanner;
 
 import chess.*;
 import com.google.gson.Gson;
@@ -93,8 +94,7 @@ public class ChessClient implements ServerMessageHandler {
                         if (params.length == 3) {
                             promotion = getPieceType(params[2]);
                             if (promotion == null) {
-                                return "Unknown promotion piece: '" + params[2] +
-                                        "'. Valid options: queen, rook, bishop, knight.";
+                                return "Unknown promotion piece: '" + params[2] + "'. Valid options: queen, rook, bishop, knight.";
                             }
                         }
 
@@ -104,9 +104,16 @@ public class ChessClient implements ServerMessageHandler {
                                 params[0], params[1],
                                 promotion != null ? " promoting to " + promotion : "");
                     case "resign":
-                        ws.resignGame(currentGame);
-                        state = State.SIGNEDIN;
-                        return "You resigned from the game.";
+                        System.out.println("Are you sure? (Y/N)");
+                        Scanner scanner = new Scanner(System.in);
+                        String line = scanner.nextLine();
+                        if (line.equals("Y")) {
+                            ws.resignGame(currentGame);
+                            state = State.SIGNEDIN;
+                            return "You resigned from the game.";
+                        } else {
+                            return "Didn't resign";
+                        }
                     case "highlight":
                         // Usage: highlight <row> <col>
                         if (params.length != 2) {

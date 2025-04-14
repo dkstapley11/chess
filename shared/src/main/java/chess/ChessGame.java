@@ -315,16 +315,8 @@ public class ChessGame {
                     return true;
                 }
             }
-            if (isInBounds(diagRight)) {
-                if (
-                        !isSquareEmpty(board, diagRight) &&
-                        board.getPiece(diagRight).getPieceType() ==
-                        ChessPiece.PieceType.PAWN &&
-                        board.getPiece(diagRight).getTeamColor() !=
-                        color)
-                {
-                    return true;
-                }
+            if (extracted(color, diagRight)) {
+                return true;
             }
         } else {
             ChessPosition diagRight = new ChessPosition(kingRow - 1, kingCol + 1);
@@ -340,16 +332,23 @@ public class ChessGame {
                     return true;
                 }
             }
-            if (isInBounds(diagRight)) {
-                if (
-                        !isSquareEmpty(board, diagRight) &&
-                        board.getPiece(diagRight).getPieceType() ==
-                        ChessPiece.PieceType.PAWN &&
-                        board.getPiece(diagRight).getTeamColor() !=
-                        color)
-                {
-                    return true;
-                }
+            if (extracted(color, diagRight)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean extracted(TeamColor color, ChessPosition diagRight) {
+        if (isInBounds(diagRight)) {
+            if (
+                    !isSquareEmpty(board, diagRight) &&
+                    board.getPiece(diagRight).getPieceType() ==
+                    ChessPiece.PieceType.PAWN &&
+                    board.getPiece(diagRight).getTeamColor() !=
+                            color)
+            {
+                return true;
             }
         }
         return false;

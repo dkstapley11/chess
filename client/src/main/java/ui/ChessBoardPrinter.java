@@ -52,30 +52,28 @@ public class ChessBoardPrinter {
 
         if (whitePerspective) {
             for (int file = 1; file <= 8; file++) {
-                ChessPosition pos = new ChessPosition(rank, file);
-                // Check if any legal move has an end position matching the current square.
-                boolean highlight = isLegalMoveTarget(pos, legalMoves);
-                String squareBg = highlight ? SET_BG_COLOR_HIGHLIGHT : getSquareBgColor(rank, file);
-                ChessPiece piece = chessBoard.getPiece(pos);
-                String pieceStr = getPieceIcon(piece);
-                String cell = String.format(" %3s ", pieceStr);
-                System.out.print(squareBg + cell + RESET_BG_COLOR);
+                extracted(chessBoard, rank, legalMoves, file);
             }
         } else {
             for (int file = 8; file >= 1; file--) {
-                ChessPosition pos = new ChessPosition(rank, file);
-                boolean highlight = isLegalMoveTarget(pos, legalMoves);
-                String squareBg = highlight ? SET_BG_COLOR_HIGHLIGHT : getSquareBgColor(rank, file);
-                ChessPiece piece = chessBoard.getPiece(pos);
-                String pieceStr = getPieceIcon(piece);
-                String cell = String.format(" %3s ", pieceStr);
-                System.out.print(squareBg + cell + RESET_BG_COLOR);
+                extracted(chessBoard, rank, legalMoves, file);
             }
         }
 
         // Print the right rank border.
         System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + String.format(" %2d ", rank)
                 + RESET_BG_COLOR + RESET_TEXT_COLOR);
+    }
+
+    private static void extracted(ChessBoard chessBoard, int rank, Collection<ChessMove> legalMoves, int file) {
+        ChessPosition pos = new ChessPosition(rank, file);
+        // Check if any legal move has an end position matching the current square.
+        boolean highlight = isLegalMoveTarget(pos, legalMoves);
+        String squareBg = highlight ? SET_BG_COLOR_HIGHLIGHT : getSquareBgColor(rank, file);
+        ChessPiece piece = chessBoard.getPiece(pos);
+        String pieceStr = getPieceIcon(piece);
+        String cell = String.format(" %3s ", pieceStr);
+        System.out.print(squareBg + cell + RESET_BG_COLOR);
     }
 
     /**
@@ -103,25 +101,24 @@ public class ChessBoardPrinter {
 
         if (whitePerspective) {
             for (int file = 1; file <= 8; file++) {
-                String squareBg = getSquareBgColor(rank, file);
-                ChessPiece piece = chessBoard.getPiece(new ChessPosition(rank, file));
-                String pieceStr = getPieceIcon(piece);
-                // Force each square to be 5 characters wide (space, 3-character cell, space)
-                String cell = String.format(" %3s ", pieceStr);
-                System.out.print(squareBg + cell + RESET_BG_COLOR);
+                extracted(chessBoard, rank, file);
             }
         } else {
             for (int file = 8; file >= 1; file--) {
-                String squareBg = getSquareBgColor(rank, file);
-                ChessPiece piece = chessBoard.getPiece(new ChessPosition(rank, file));
-                String pieceStr = getPieceIcon(piece);
-                String cell = String.format(" %3s ", pieceStr);
-                System.out.print(squareBg + cell + RESET_BG_COLOR);
+                extracted(chessBoard, rank, file);
             }
         }
 
         // Print right rank border.
         System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLUE + String.format(" %2d ", rank) + RESET_BG_COLOR + RESET_TEXT_COLOR);
+    }
+
+    private static void extracted(ChessBoard chessBoard, int rank, int file) {
+        String squareBg = getSquareBgColor(rank, file);
+        ChessPiece piece = chessBoard.getPiece(new ChessPosition(rank, file));
+        String pieceStr = getPieceIcon(piece);
+        String cell = String.format(" %3s ", pieceStr);
+        System.out.print(squareBg + cell + RESET_BG_COLOR);
     }
 
     /**
