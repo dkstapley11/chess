@@ -93,9 +93,6 @@ public class ChessClient implements ServerMessageHandler {
                         ChessPiece.PieceType promotion = null;
                         if (params.length == 3) {
                             promotion = getPieceType(params[2]);
-                            if (promotion == null) {
-                                return "Unknown promotion piece: '" + params[2] + "'. Valid options: queen, rook, bishop, knight.";
-                            }
                         }
 
                         // perform the move
@@ -104,16 +101,9 @@ public class ChessClient implements ServerMessageHandler {
                                 params[0], params[1],
                                 promotion != null ? " promoting to " + promotion : "");
                     case "resign":
-                        System.out.println("Are you sure? (Y/N)");
-                        Scanner scanner = new Scanner(System.in);
-                        String line = scanner.nextLine();
-                        if (line.equals("Y")) {
-                            ws.resignGame(currentGame);
-                            state = State.SIGNEDIN;
-                            return "You resigned from the game.";
-                        } else {
-                            return "Didn't resign";
-                        }
+                        ws.resignGame(currentGame);
+                        state = State.SIGNEDIN;
+                        return "You resigned from the game.";
                     case "highlight":
                         // Usage: highlight <row> <col>
                         if (params.length != 2) {
